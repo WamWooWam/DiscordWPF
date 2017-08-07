@@ -13,7 +13,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Image x:Name="discordImage" Source="{StaticResource DiscordLogoBlack}" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="300"/>
-        <TextBlock x:Name="errorText" Grid.Row="1"  MaxWidth="300" Visibility="Collapsed" Foreground="Red" HorizontalAlignment="Center">Example error text</TextBlock>
+        <TextBlock x:Name="errorText" Grid.Row="1" TextWrapping="Wrap" MaxWidth="350" Visibility="Collapsed" Foreground="Red" HorizontalAlignment="Center">Example error text</TextBlock>
         <Grid Grid.Row="2" VerticalAlignment="Center" MaxWidth="300" >
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>

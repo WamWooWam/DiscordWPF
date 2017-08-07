@@ -179,6 +179,9 @@ namespace DiscordWPF
 
             Client.CurrentUserUpdated += Client_CurrentUserUpdated;
 
+            Client.JoinedGuild += Client_JoinedGuild;
+            Client.LeftGuild += Client_LeftGuild;
+
             Client.GuildAvailable += Client_GuildAvailable;
             Client.GuildUnavailable += Client_GuildUnavailable;
 
@@ -188,6 +191,80 @@ namespace DiscordWPF
 
             await Client.LoginAsync(type, Token);
             await Client.StartAsync();
+        }
+
+        private async Task Reset()
+        {
+            if (populate?.ThreadState == ThreadState.Running)
+                populate.Abort();
+
+            selectedGuild = null;
+            selectedTextChannel = null;
+            await Dispatcher.InvokeAsync(() =>
+            {
+                channelName.Text = "#channel";
+                channelTopic.Text = "Select a channel to begin!";
+                Title = $"Welcome - DiscordWPF";
+
+                Icon = Properties.Resources.app.ToImageSource();
+
+                messageViewer.Items.Clear();
+                usersList.Items.Clear();
+            });
+        }
+
+        private async Task RefreshGuilds()
+        {
+
+            await Dispatcher.InvokeAsync(() =>
+            {
+                GuildsList.Items.Clear();
+
+                userName.Text = Client.CurrentUser.Username;
+                userDiscrim.Text = $"#{Client.CurrentUser.Discriminator}";
+                userProfile.ImageSource = new BitmapImage(new Uri(Client.CurrentUser.GetAvatarUrl()));
+
+                DMGuildViewer dms = new DMGuildViewer(Client.DMChannels);
+                GuildsList.Items.Add(dms);
+                DMGuildViewer groups = new DMGuildViewer(Client.GroupChannels);
+                GuildsList.Items.Add(groups);
+
+                GuildsList.Items.Add(new Separator());
+            });
+
+            foreach (IGuild guild in Client.Guilds.OrderBy(g => g.Name))
+            {
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    GuildViewer viewer = new GuildViewer(guild);
+                    GuildsList.Items.Add(viewer);
+                    if (guild.Available)
+                        viewer.IsAvailable = true;
+                });
+
+            }
+        }
+
+        private async Task Client_LeftGuild(SocketGuild arg)
+        {
+            GuildViewer viewer = GuildsList.Items.OfType<GuildViewer>().FirstOrDefault(g => g.Guild.Id == arg.Id);
+            if (viewer != null)
+            {
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    GuildsList.Items.Remove(viewer);
+                });
+            }
+
+            if (selectedGuild.Id == arg.Id)
+            {
+               await Reset();
+            }
+        }
+
+        private async Task Client_JoinedGuild(SocketGuild arg)
+        {
+            await RefreshGuilds();
         }
 
         private async Task Client_CurrentUserUpdated(ISelfUser arg1, ISelfUser arg2)
@@ -200,34 +277,30 @@ namespace DiscordWPF
             });
         }
 
-        private MouseButtonEventHandler unavailableHandler = null;
-
-        private async Task Client_GuildUnavailable(IGuild arg)
+        private async Task Client_GuildUnavailable(SocketGuild arg)
         {
-
-
-            await Dispatcher.InvokeAsync(() =>
+            GuildViewer viewer = GuildsList.Items.OfType<GuildViewer>().FirstOrDefault(g => g.Guild.Id == arg.Id);
+            if (viewer != null)
             {
-                GuildViewer viewer = GuildsList.Items.OfType<GuildViewer>().FirstOrDefault(g => g.Guild.Id == arg.Id);
-                if (viewer != null)
+                await Dispatcher.InvokeAsync(() =>
                 {
                     int index = GuildsList.Items.IndexOf(viewer);
                     viewer.IsAvailable = false;
-                }
-            });
+                });
+            }
         }
 
-        private async Task Client_GuildAvailable(IGuild arg)
+        private async Task Client_GuildAvailable(SocketGuild arg)
         {
-            await Dispatcher.InvokeAsync(() =>
+            GuildViewer viewer = GuildsList.Items.OfType<GuildViewer>().FirstOrDefault(g => g.Guild.Id == arg.Id);
+            if (viewer != null)
             {
-                GuildViewer viewer = GuildsList.Items.OfType<GuildViewer>().FirstOrDefault(g => g.Guild.Id == arg.Id);
-                if (viewer != null)
+                await Dispatcher.InvokeAsync(() =>
                 {
                     int index = GuildsList.Items.IndexOf(viewer);
                     viewer.IsAvailable = true;
-                }
-            });
+                });
+            }
         }
 
         private async Task Client_LoggedOut()
@@ -293,30 +366,7 @@ namespace DiscordWPF
         /// <returns></returns>
         private async Task Client_Connected()
         {
-            await Dispatcher.InvokeAsync(() =>
-            {
-                GuildsList.Items.Clear();
-
-                userName.Text = Client.CurrentUser.Username;
-                userDiscrim.Text = $"#{Client.CurrentUser.Discriminator}";
-                userProfile.ImageSource = new BitmapImage(new Uri(Client.CurrentUser.GetAvatarUrl()));
-
-                DMGuildViewer dms = new DMGuildViewer(Client.DMChannels);
-                GuildsList.Items.Add(dms);
-                DMGuildViewer groups = new DMGuildViewer(Client.GroupChannels);
-                GuildsList.Items.Add(groups);
-
-                GuildsList.Items.Add(new Separator());
-            });
-
-            foreach (IGuild guild in Client.Guilds.OrderBy(g => g.Name))
-            {
-                await Dispatcher.InvokeAsync(() =>
-                {
-                    GuildsList.Items.Add(new GuildViewer(guild));
-                });
-
-            }
+            await RefreshGuilds();
 
             await Dispatcher.InvokeAsync(() =>
             {

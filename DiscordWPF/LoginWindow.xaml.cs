@@ -81,6 +81,7 @@ namespace DiscordWPF
 
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
+            IsEnabled = false;
             if (token.Visibility == Visibility.Visible)
             {
                 DiscordWindow window = new DiscordWindow(tokenBox.Password.Trim('"'));
@@ -98,25 +99,25 @@ namespace DiscordWPF
             }
             else
             {
-                usernameBox.BorderBrush = Brushes.Black;
-                passwordBox.BorderBrush = Brushes.Black;
+                usernameBox.BorderBrush = App.SecondaryForegroundBrush;
+                passwordBox.BorderBrush = App.SecondaryForegroundBrush;
                 errorText.Visibility = Visibility.Collapsed;
 
 
                 errorText.Text = "";
                 if (string.IsNullOrEmpty(usernameBox.Text))
                 {
-                    usernameBox.BorderBrush = Brushes.Red;
+                    usernameBox.BorderBrush = new SolidColorBrush(App.ErrorColour);
                     errorText.Text += "Enter an email address dipshit.\r\n";
                 }
                 else if (!Tools.IsValidEmail(usernameBox.Text))
                 {
-                    usernameBox.BorderBrush = Brushes.Red;
+                    usernameBox.BorderBrush = new SolidColorBrush(App.ErrorColour);
                     errorText.Text += "Sorry! That email address doesn't seem right.\r\n";
                 }
                 if (string.IsNullOrEmpty(passwordBox.Password))
                 {
-                    passwordBox.BorderBrush = Brushes.Red;
+                    passwordBox.BorderBrush = new SolidColorBrush(App.ErrorColour);
                     errorText.Text += "Enter a password you retard.\r\n";
                 }
 
@@ -135,38 +136,54 @@ namespace DiscordWPF
                         });
                         StringContent cont = new StringContent(initialRequest, Encoding.UTF8, "application/json");
                         HttpResponseMessage initialResponse = await client.PostAsync("https://discordapp.com/api/v6/auth/login", cont);
-
-                        LoginResponse response = JsonConvert.DeserializeObject<LoginResponse>(await initialResponse.Content.ReadAsStringAsync());
-                        if (response.TwoFactor)
+                        string txtCont = await initialResponse.Content.ReadAsStringAsync();
+                        try
                         {
-                            did2fa = true;
-                            Dialogs.InputDialog dialog = new Dialogs.InputDialog();
-                            dialog.MainInstruction = "Enter 2-factor code";
-                            dialog.Text = "You seem to have two-factor authentication enabled for your account. Please enter the code here.";
-                            if (dialog.ShowDialog() == true)
+                            initialResponse.EnsureSuccessStatusCode();
+                            LoginResponse response = JsonConvert.DeserializeObject<LoginResponse>(txtCont);
+                            if (response.TwoFactor)
                             {
-                                string twoFAString = dialog.Input;
-                                if (Int32.TryParse(twoFAString, out int dontneedthislol))
+                                did2fa = true;
+                                Dialogs.InputDialog dialog = new Dialogs.InputDialog();
+                                dialog.MainInstruction = "Enter 2-factor code";
+                                dialog.Text = "You seem to have two-factor authentication enabled for your account. Please enter the code here.";
+                                if (dialog.ShowDialog() == true)
                                 {
-                                    string twoFARequest = JsonConvert.SerializeObject(new Login2FARequest()
+                                    string twoFAString = dialog.Input;
+                                    if (Int32.TryParse(twoFAString, out int dontneedthislol))
                                     {
-                                        Code = twoFAString,
-                                        Ticket = response.Ticket
-                                    });
-                                    cont = new StringContent(twoFARequest, Encoding.UTF8, "application/json");
+                                        string twoFARequest = JsonConvert.SerializeObject(new Login2FARequest()
+                                        {
+                                            Code = twoFAString,
+                                            Ticket = response.Ticket
+                                        });
+                                        cont = new StringContent(twoFARequest, Encoding.UTF8, "application/json");
 
-                                    HttpResponseMessage twoFAResponse = await client.PostAsync("https://discordapp.com/api/v6/auth/mfa/totp", cont);
-                                    response = JsonConvert.DeserializeObject<LoginResponse>(await twoFAResponse.Content.ReadAsStringAsync());
+                                        HttpResponseMessage twoFAResponse = await client.PostAsync("https://discordapp.com/api/v6/auth/mfa/totp", cont);
+                                        response = JsonConvert.DeserializeObject<LoginResponse>(await twoFAResponse.Content.ReadAsStringAsync());
 
-                                    token = response.Token;
+                                        token = response.Token;
+                                    }
                                 }
                             }
+                            else
+                            {
+                                token = response.Token;
+                            }
                         }
-                        else
+                        catch
                         {
-                            token = response.Token;
+                            try
+                            {
+                                LoginResponseError errorResponse = JsonConvert.DeserializeObject<LoginResponseError>(txtCont);
+                                if (errorResponse.EmailAddressErrors != null)
+                                {
+                                    usernameBox.BorderBrush = new SolidColorBrush(App.ErrorColour);
+                                    errorText.Text += string.Join("\r\n", errorResponse.EmailAddressErrors);
+                                }
+                            }
+                            catch { }
                         }
-
                     }
                     if (token != null)
                     {
@@ -184,7 +201,7 @@ namespace DiscordWPF
 
                         Close();
                     }
-                    else
+                    else if (string.IsNullOrWhiteSpace(errorText.Text))
                     {
                         TaskDialog errorDialog = new TaskDialog();
                         errorDialog.MainIcon = TaskDialogIcon.Error;
@@ -196,12 +213,17 @@ namespace DiscordWPF
                         errorDialog.Buttons.Add(new TaskDialogButton(ButtonType.Ok));
                         errorDialog.Show();
                     }
+                    else
+                    {
+                        errorText.Visibility = Visibility.Visible;
+                    }
                 }
                 else
                 {
                     errorText.Visibility = Visibility.Visible;
                 }
             }
+            IsEnabled = true;
         }
     }
 }

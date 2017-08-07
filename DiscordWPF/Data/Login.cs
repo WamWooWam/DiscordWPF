@@ -47,4 +47,16 @@ namespace DiscordWPF.Data
         [JsonProperty("ticket")]
         public string Ticket { get; set; }
     }
+
+    /// <summary>
+    /// A discord login response error
+    /// </summary>
+    class LoginResponseError
+    {
+        [JsonProperty("email")]
+        public string[] EmailAddressErrors { get; set; }
+
+        [JsonProperty("password")]
+        public string[] PasswordErrors { get; set; }
+    }
 }
