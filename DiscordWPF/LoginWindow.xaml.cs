@@ -144,13 +144,11 @@ namespace DiscordWPF
                             if (response.TwoFactor)
                             {
                                 did2fa = true;
-                                Dialogs.InputDialog dialog = new Dialogs.InputDialog();
-                                dialog.MainInstruction = "Enter 2-factor code";
-                                dialog.Text = "You seem to have two-factor authentication enabled for your account. Please enter the code here.";
+                                Dialogs.TwoFactorAuthDialog dialog = new Dialogs.TwoFactorAuthDialog();
                                 if (dialog.ShowDialog() == true)
                                 {
-                                    string twoFAString = dialog.Input;
-                                    if (Int32.TryParse(twoFAString, out int dontneedthislol))
+                                    string twoFAString = dialog.Code;
+                                    if (Int32.TryParse(twoFAString, out int dontneedthislol) || (twoFAString.Length == 9 && twoFAString[4] == '-'))
                                     {
                                         string twoFARequest = JsonConvert.SerializeObject(new Login2FARequest()
                                         {
