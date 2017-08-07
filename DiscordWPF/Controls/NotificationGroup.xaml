@@ -1,0 +1,32 @@
+﻿<UserControl x:Class="DiscordWPF.Controls.NotificationGroup"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DiscordWPF.Controls"
+             mc:Ignorable="d" 
+              Background="{DynamicResource BackgroundBrush}"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <Grid Margin="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="32"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+
+            <Ellipse x:Name="imageContainer" VerticalAlignment="Top" Height="32px">
+                <Ellipse.Fill>
+                    <ImageBrush x:Name="sourceImage" ImageSource="{DynamicResource StockPFP}"></ImageBrush>
+                </Ellipse.Fill>
+            </Ellipse>
+            <TextBlock x:Name="sourceTitle" Grid.Column="1" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="14" FontWeight="Bold">Username</TextBlock>
+        </Grid>
+        <Grid Name="messageViewContainer" Grid.Row="1" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ListView x:Name="messageViewer" ScrollViewer.CanContentScroll="False" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Foreground="{DynamicResource ForegroundBrush}" Background="{DynamicResource SecondaryBackgroundBrush}" BorderBrush="#00000000"></ListView>
+        </Grid>
+    </Grid>
+</UserControl>

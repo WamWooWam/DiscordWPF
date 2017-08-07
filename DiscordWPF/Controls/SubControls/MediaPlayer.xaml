@@ -1,0 +1,55 @@
+﻿<UserControl x:Name="mainWindow" x:Class="DiscordWPF.Controls.SubControls.MediaPlayer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DiscordWPF.Controls.SubControls"
+             xmlns:fa="http://schemas.fontawesome.io/icons/"
+             mc:Ignorable="d" 
+             d:DesignHeight="275" d:DesignWidth="475" MinWidth="150" MinHeight="100" Foreground="{DynamicResource ForegroundBrush}">
+    <Grid>
+        <Grid x:Name="mediaPlayer" Visibility="Visible" MaxWidth="640">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*" MaxHeight="480"/>
+                <RowDefinition Height="55"/>
+            </Grid.RowDefinitions>
+            <MediaElement x:Name="media" Visibility="Collapsed" Stretch="Uniform" LoadedBehavior="Manual" PreviewMouseRightButtonUp="media_PreviewMouseRightButtonUp" />
+            <Image x:Name="thumbnail" Stretch="Uniform"></Image>
+            <Grid x:Name="controlsContainer" Grid.Row="1" Margin="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <fa:ImageAwesome x:Name="playPause" Icon="Play" Width="32" Height="32" MouseUp="Button_Click" VerticalAlignment="Center" Foreground="{DynamicResource ForegroundBrush}"></fa:ImageAwesome>
+                <Grid Grid.Column="1" VerticalAlignment="Center" Margin="10,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="0:00" x:Name="elapsedTime" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Grid Grid.Column="1">
+                        <ProgressBar x:Name="playBar" Margin="5,0" MouseDown="SetPlayPosition" MouseMove="playBar_MouseMove" MouseUp="SetPlayPosition" Background="#00000000" Height="20" />
+                    </Grid>
+                    <TextBlock Grid.Column="2" x:Name="remainingTime" Text="0:00" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Grid>
+                <Grid x:Name="muteUnmute" Grid.Column="2" MouseUp="muteUnmute_MouseUp">
+                    <fa:ImageAwesome Foreground="{DynamicResource ForegroundBrush}" Icon="VolumeUp" Width="28" Height="28" MouseDown="muteUnmute_MouseDown" VerticalAlignment="Center"></fa:ImageAwesome>
+                    <fa:ImageAwesome Foreground="{DynamicResource ErrorBrush}" x:Name="mutedIcon" Icon="Ban" Width="28" Height="28" VerticalAlignment="Center"></fa:ImageAwesome>
+                </Grid>
+            </Grid>
+        </Grid>
+        <Grid x:Name="mediaError" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Label x:Name="label" Content="Failed to load media." HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="Red" FontSize="16" FontWeight="Bold"/>
+            <Label Grid.Row="1" x:Name="label1" Content="An error occured loading media: " HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="14" FontWeight="Normal" />
+            <TextBlock Grid.Row="2" Margin="5,0,0,0" FontWeight="Bold"><Hyperlink Click="Hyperlink_Click">Click to download!</Hyperlink></TextBlock>
+        </Grid>
+       
+    </Grid>
+</UserControl>

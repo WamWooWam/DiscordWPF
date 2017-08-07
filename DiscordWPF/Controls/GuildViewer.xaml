@@ -1,0 +1,38 @@
+﻿<ListViewItem Style="{DynamicResource listViewItemStyle}" x:Class="DiscordWPF.Controls.GuildViewer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="DiscordWPF.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="36" MouseUp="ListViewItem_MouseUp" HorizontalContentAlignment="Stretch" Loaded="ListViewItem_Loaded">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="32"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+        <Grid VerticalAlignment="Top" Height="32px">
+            <Ellipse>
+                <Ellipse.Fill>
+                    <ImageBrush x:Name="guildImage"></ImageBrush>
+                </Ellipse.Fill>
+            </Ellipse>
+            <Border Background="Red" Visibility="Hidden" VerticalAlignment="Bottom" HorizontalAlignment="Right" CornerRadius="2" x:Name="badgeMain">
+                <TextBlock Padding="2,0,2,0" FontSize="9" x:Name="badgeText" Foreground="White">1</TextBlock>
+            </Border>
+        </Grid>
+
+        <Grid x:Name="mainGrid" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <TextBlock x:Name="guildName" Foreground="{DynamicResource ForegroundBrush}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" Text="%NAME%" FontSize="16" Margin="5,0,0,0" FontWeight="Bold" />
+            <TextBlock x:Name="guildDescription" Foreground="{DynamicResource SecondaryForegroundBrush}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" Text="%PATH%" FontSize="10" Margin="5,20,0,0" FontWeight="SemiBold" />
+
+            <ListView x:Name="channelsList" Grid.Row="2" Visibility="Collapsed" HorizontalContentAlignment="Stretch" Background="Transparent" Margin="0,2,0,0" BorderBrush="#00ABADB3">
+                
+            </ListView>
+        </Grid>
+    </Grid>
+</ListViewItem>

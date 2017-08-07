@@ -1,0 +1,164 @@
+﻿<ListViewItem Style="{DynamicResource listViewItemStyle}" x:Class="DiscordWPF.Controls.MessageViewer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="DiscordWPF.Controls"
+              xmlns:local1="clr-namespace:Markdown.Xaml;assembly=Markdown.Xaml"
+              xmlns:controls="clr-namespace:DiscordWPF.Controls"
+              xmlns:fa="http://schemas.fontawesome.io/icons/"
+              mc:Ignorable="d" 
+             d:DesignHeight="46" Loaded="copyMessageId_Loaded" MouseUp="ListViewItem_MouseUp" Margin="0,0,3,0">
+    <ListViewItem.Resources>
+        <local1:Markdown x:Key="Markdown"
+                        DocumentStyle="{StaticResource DocumentStyle}"
+                        Heading1Style="{StaticResource H1Style}"
+                        Heading2Style="{StaticResource H2Style}"
+                        Heading3Style="{StaticResource H3Style}"
+                        Heading4Style="{StaticResource H4Style}"
+                        LinkStyle="{StaticResource LinkStyle}"
+                        ImageStyle="{StaticResource ImageStyle}"
+                        SeparatorStyle="{StaticResource SeparatorStyle}"
+                         CodeStyle="{StaticResource CodeStyle}" />
+        <local1:TextToFlowDocumentConverter x:Key="TextToFlowDocumentConverter" x:Name="mdConverter"
+                                           Markdown="{StaticResource Markdown}"/>
+
+        <Style x:Key="{x:Type TextBoxBase}" TargetType="{x:Type TextBoxBase}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+            <Setter Property="SelectionBrush" Value="{DynamicResource SecondaryForegroundBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="KeyboardNavigation.TabNavigation" Value="None"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="AllowDrop" Value="true"/>
+            <Setter Property="ScrollViewer.PanningMode" Value="VerticalFirst"/>
+            <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
+            <Setter Property="Cursor" Value="Arrow"></Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TextBoxBase}">
+                        <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                            <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Opacity" TargetName="border" Value="0.56"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="IsInactiveSelectionHighlightEnabled" Value="true"/>
+                        <Condition Property="IsSelectionActive" Value="false"/>
+                    </MultiTrigger.Conditions>
+                    <Setter Property="SelectionBrush" Value="{DynamicResource {x:Static SystemColors.InactiveSelectionHighlightBrushKey}}"/>
+                </MultiTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="{x:Type Hyperlink}" TargetType="{x:Type Hyperlink}">
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HotTrackBrushKey}}"/>
+            <Setter Property="TextDecorations" Value="Underline"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="true">
+                    <Setter Property="Foreground" Value="Red"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="false">
+                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="true">
+                    <Setter Property="Cursor" Value="Hand"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="{x:Type RichTextBox}">
+            <Style.Resources>
+                <Style x:Key="{x:Type FlowDocument}" TargetType="{x:Type FlowDocument}">
+                    <Setter Property="OverridesDefaultStyle" Value="true"/>
+                </Style>
+                <Style x:Key="{x:Type Hyperlink}" BasedOn="{StaticResource {x:Type Hyperlink}}" TargetType="{x:Type Hyperlink}">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter Property="Foreground" Value="Blue"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Style.Resources>
+            <Setter Property="MinWidth" Value="10"/>
+            <Style.BasedOn>
+                <StaticResource ResourceKey="{x:Type TextBoxBase}"/>
+            </Style.BasedOn>
+        </Style>
+    </ListViewItem.Resources>
+    <ListViewItem.ContextMenu>
+        <ContextMenu x:Name="ContextMenu">
+            <MenuItem x:Name="copyMesage" Header="Copy" Click="copyMesage_Click">
+                <MenuItem.Icon>
+                    <fa:ImageAwesome Icon="Copy"></fa:ImageAwesome>
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator />
+            <MenuItem x:Name="editMessage" Header="Edit message" Click="editMessage_Click" >
+                <MenuItem.Icon>
+                    <fa:ImageAwesome Icon="Edit"></fa:ImageAwesome>
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem x:Name="deleteMessage" Header="Delete message" Click="deleteMessage_Click">
+                <MenuItem.Icon>
+                    <fa:ImageAwesome Icon="Times"></fa:ImageAwesome>
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator />
+            <MenuItem x:Name="pinMessage" Header="Pin message" Click="pinMessage_Click" >
+                <MenuItem.Icon>
+                    <fa:ImageAwesome Icon="ThumbTack"></fa:ImageAwesome>
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator />
+            <MenuItem x:Name="copyMessageId" Header="Copy ID" Click="copyMessageId_Click" />
+        </ContextMenu>
+    </ListViewItem.ContextMenu>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="32"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+
+        <Ellipse x:Name="imageContainer" VerticalAlignment="Top" Height="32px">
+            <Ellipse.Fill>
+                <ImageBrush x:Name="authorImage"></ImageBrush>
+            </Ellipse.Fill>
+        </Ellipse>
+
+        <Grid x:Name="mainGrid" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <TextBlock x:Name="authorName" Foreground="{DynamicResource ForegroundBrush}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" FontSize="16" Margin="5,0,5,0" FontWeight="Bold" Grid.Row="0" Loaded="authorName_Loaded" HorizontalAlignment="Left">
+                Author's User/Nickname
+            </TextBlock>
+            <Grid Margin="5,0,5,0" Grid.Row="1">
+                <RichTextBox x:Name="messageBody" FontSize="14" IsReadOnly="True" Block.LineHeight="14">
+                    <RichTextBox.Resources>
+                        <Style TargetType="{x:Type Paragraph}">
+                            <Setter Property="Margin" Value="0"/>
+                        </Style>
+                    </RichTextBox.Resources>
+                </RichTextBox>
+                <TextBox x:Name="messageEditBody" Foreground="{DynamicResource ForegroundBrush}" SpellCheck.IsEnabled="True" TextWrapping="Wrap" Background="#00000000" FontSize="14" Visibility="Collapsed" KeyDown="messageEditBody_KeyDown">
+                    
+                </TextBox>
+            </Grid>
+
+        </Grid>
+    </Grid>
+</ListViewItem>
