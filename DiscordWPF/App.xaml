@@ -25,17 +25,11 @@
         <SolidColorBrush x:Key="DarkSecondaryBrush" Color="#FF282828"/>
         <SolidColorBrush x:Key="DarkSelectedBackgroundBrush" Color="#FF414141"/>
 
-        <Color x:Key="Foreground">#FF000000</Color>
-        <Color x:Key="SecondaryForeground">#FFA9A9A9</Color>
-        <Color x:Key="Background">#FFFFFFFF</Color>
-        <Color x:Key="SecondaryBackground">#FFD3D3D3</Color>
-        <Color x:Key="SelectedBackground">#FF808080</Color>
-
-        <SolidColorBrush x:Key="ForegroundBrush" Color="{DynamicResource Foreground}"/>
-        <SolidColorBrush x:Key="SecondaryForegroundBrush" Color="{DynamicResource SecondaryForeground}"/>
-        <SolidColorBrush x:Key="BackgroundBrush" Color="{DynamicResource Background}"/>
-        <SolidColorBrush x:Key="SecondaryBackgroundBrush" Color="{DynamicResource SecondaryBackground}"/>
-        <SolidColorBrush x:Key="SelectedBackgroundBrush" Color="{DynamicResource SelectedBackground}"/>
+        <SolidColorBrush x:Key="ForegroundBrush" Color="#FF000000" />
+        <SolidColorBrush x:Key="SecondaryForegroundBrush" Color="#FFA9A9A9"/>
+        <SolidColorBrush x:Key="BackgroundBrush" Color="#FFFFFFFF"/>
+        <SolidColorBrush x:Key="SecondaryBackgroundBrush" Color="#FFD3D3D3"/>
+        <SolidColorBrush x:Key="SelectedBackgroundBrush" Color="#FF808080"/>
 
         <SolidColorBrush x:Key="SuccessBrush" Color="Green"/>
         <SolidColorBrush x:Key="WarningBrush" Color="Orange"/>

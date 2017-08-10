@@ -188,11 +188,11 @@ namespace DiscordWPF
 
         public static void UpdateResources()
         {
-            App.Current.Resources["Background"] = BackgroundBrush.Color;
-            App.Current.Resources["Foreground"] = ForegroundBrush.Color;
-            App.Current.Resources["SecondaryBackground"] = SecondaryBackgroundBrush.Color;
-            App.Current.Resources["SecondaryForeground"] = SecondaryForegroundBrush.Color;
-            App.Current.Resources["SelectedBackground"] = SelectedBackgroundBrush.Color;
+            App.Current.Resources["BackgroundBrush"] = BackgroundBrush;
+            App.Current.Resources["ForegroundBrush"] = ForegroundBrush;
+            App.Current.Resources["SecondaryBackgroundBrush"] = SecondaryBackgroundBrush;
+            App.Current.Resources["SecondaryForegroundBrush"] = SecondaryForegroundBrush;
+            App.Current.Resources["SelectedBackgroundBrush"] = SelectedBackgroundBrush;
 
             App.Current.Resources["SuccessBrush"] = new SolidColorBrush(SuccessColour);
             App.Current.Resources["WarningBrush"] = new SolidColorBrush(WarningColour);
