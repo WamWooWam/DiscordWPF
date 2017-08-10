@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
@@ -55,6 +56,9 @@ namespace DiscordWPF
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
+            AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+
             System.Windows.Forms.Application.EnableVisualStyles();
             SetBrowserEmulationMode();
 
@@ -132,6 +136,16 @@ namespace DiscordWPF
             }
         }
 
+        private void CurrentDomain_FirstChanceException(object sender, FirstChanceExceptionEventArgs e)
+        {
+            
+        }
+
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            
+        }
+
         public void SetBrowserEmulationMode()
         {
             string fileName = Path.GetFileName(Process.GetCurrentProcess().MainModule.FileName);
@@ -174,11 +188,11 @@ namespace DiscordWPF
 
         public static void UpdateResources()
         {
-            App.Current.Resources["BackgroundBrush"] = BackgroundBrush;
-            App.Current.Resources["ForegroundBrush"] = ForegroundBrush;
-            App.Current.Resources["SecondaryBackgroundBrush"] = SecondaryBackgroundBrush;
-            App.Current.Resources["SecondaryForegroundBrush"] = SecondaryForegroundBrush;
-            App.Current.Resources["SelectedBackgroundBrush"] = SelectedBackgroundBrush;
+            App.Current.Resources["Background"] = BackgroundBrush.Color;
+            App.Current.Resources["Foreground"] = ForegroundBrush.Color;
+            App.Current.Resources["SecondaryBackground"] = SecondaryBackgroundBrush.Color;
+            App.Current.Resources["SecondaryForeground"] = SecondaryForegroundBrush.Color;
+            App.Current.Resources["SelectedBackground"] = SelectedBackgroundBrush.Color;
 
             App.Current.Resources["SuccessBrush"] = new SolidColorBrush(SuccessColour);
             App.Current.Resources["WarningBrush"] = new SolidColorBrush(WarningColour);

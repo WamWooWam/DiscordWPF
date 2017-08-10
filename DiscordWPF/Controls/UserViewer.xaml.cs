@@ -93,7 +93,7 @@ namespace DiscordWPF.Controls
 
             string url = user.GetAvatarUrl(Discord.ImageFormat.Png);
             if (url != null)
-                await Dispatcher.InvokeAsync(() => channelIcon.ImageSource = new BitmapImage(new Uri(url)));
+                await Dispatcher.InvokeAsync(() => channelIcon.ImageSource = Images.GetImage(url));
             else
                 await Dispatcher.InvokeAsync(() => channelIcon.ImageSource = App.Current.Resources["StockPFP"] as BitmapImage);
         }

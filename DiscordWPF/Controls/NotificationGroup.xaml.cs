@@ -29,9 +29,10 @@ namespace DiscordWPF.Controls
 
             if (model.Type == NotifIcationType.Guild)
             {
-                sourceTitle.Text = model.Guild.Name;
-                if (model.Guild.IconUrl != null)
-                    sourceImage.ImageSource = new BitmapImage(new Uri(model.Guild.IconUrl));
+                SocketGuild guild = App.DiscordWindow.Client.GetGuild((model.Channel as IGuildChannel).Guild.Id);
+                sourceTitle.Text = guild.Name;
+                if (guild.IconUrl != null)
+                    sourceImage.ImageSource = Images.GetImage(guild.IconUrl);
             }
 
             foreach (IMessage msg in model.Messages)

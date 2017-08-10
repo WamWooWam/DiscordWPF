@@ -1,5 +1,7 @@
 ﻿using Discord;
+using Discord.Rest;
 using Discord.WebSocket;
+using DiscordWPF.Controls.SubControls;
 using DiscordWPF.Data;
 using Markdown.Xaml;
 using Microsoft.WindowsAPICodePack.Dialogs;
@@ -68,7 +70,7 @@ namespace DiscordWPF.Controls
                 if (message.Content != null && !string.IsNullOrWhiteSpace(message.Content))
                 {
                     if (App.Config.General.FormatText)
-                        messageBody.Document = (FlowDocument)(Resources["TextToFlowDocumentConverter"] as TextToFlowDocumentConverter).Convert(message.Content.Replace(Environment.NewLine, Environment.NewLine + Environment.NewLine), typeof(FlowDocument), null, null);
+                        messageBody.Document = (FlowDocument)(App.Current.Resources["TextToFlowDocumentConverter"] as TextToFlowDocumentConverter).Convert(message.Content.Replace(Environment.NewLine, Environment.NewLine + Environment.NewLine), typeof(FlowDocument), null, null);
                     else
                         messageBody.AppendText(message.Content);
                     messageEditBody.Text = message.Content;
@@ -151,7 +153,7 @@ namespace DiscordWPF.Controls
             messageBody.Foreground = (Parent as Control).Foreground;
             string url = IMessage.Author.GetAvatarUrl();
             if (url != null)
-                await Dispatcher.InvokeAsync(() => authorImage.ImageSource = new BitmapImage(new Uri(url)));
+                await Dispatcher.InvokeAsync(() => authorImage.ImageSource = Images.GetImage(url));
             else
                 await Dispatcher.InvokeAsync(() => authorImage.ImageSource = App.Current.Resources["StockPFP"] as BitmapImage);
         }
@@ -224,6 +226,11 @@ namespace DiscordWPF.Controls
                 });
             }
 
+            await Dispatcher.InvokeAsync(() =>
+            {
+                pinMessage.IsEnabled = DiscordWindow.GuildPermissions?.ManageMessages == true;
+            });
+
             if (IMessage.Embeds.Any())
             {
                 foreach (IEmbed embed in IMessage.Embeds)
@@ -258,6 +265,19 @@ namespace DiscordWPF.Controls
                         attachment.HorizontalAlignment = HorizontalAlignment.Left;
 
                         mainGrid.Children.Add(attachment);
+                    });
+                }
+            }
+
+            if(IMessage is RestUserMessage)
+            {
+                RestUserMessage restMessage = (IMessage as RestUserMessage);
+                foreach(KeyValuePair<IEmote, ReactionMetadata> reaction in restMessage.Reactions)
+                {
+                    await Dispatcher.InvokeAsync(() =>
+                    {
+                        ReactionViewer viewer = new ReactionViewer(reaction);
+                        reactionPanel.Children.Add(viewer);
                     });
                 }
             }

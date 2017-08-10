@@ -59,7 +59,6 @@ namespace DiscordWPF
 
         bool loaded = false;
 
-
         public static ChannelPermissions ChannelPermissions
         {
             get
@@ -104,7 +103,7 @@ namespace DiscordWPF
 
             statusOverlay.Visibility = Visibility.Visible;
             settingsContainer.Children.Add(new SettingsUI());
-            CommandManager.RegisterClassCommandBinding(typeof(DiscordWindow), new CommandBinding(ApplicationCommands.Paste, new ExecutedRoutedEventHandler(messageTextBox_Paste), new CanExecuteRoutedEventHandler(messageTextBox_CanPaste)));
+            CommandManager.RegisterClassCommandBinding(typeof(DiscordWindow), new CommandBinding(ApplicationCommands.Paste, new ExecutedRoutedEventHandler(messageTextBox_PasteAsync), new CanExecuteRoutedEventHandler(messageTextBox_CanPaste)));
             icon = new System.Windows.Forms.NotifyIcon();
             icon.Icon = Properties.Resources.app;
             icon.Visible = true;
@@ -114,40 +113,9 @@ namespace DiscordWPF
             icon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
         }
 
-        public void ChangeTheme()
-        {
-            //Background = App.BackgroundBrush;
-            //Foreground = App.ForegroundBrush;
-
-            //FontFamily = App.Font;
-
-            //GuildsList.Background = App.SecondaryBackgroundBrush;
-            //notificationContainer.Background = App.SecondaryBackgroundBrush;
-            //usersList.Background = App.SecondaryBackgroundBrush;
-
-            //statusContainer.Background = App.SecondaryBackgroundBrush;
-
-            //userDiscrim.Foreground = App.SecondaryForegroundBrush;
-
-            //foreach (IThemeable themable in GuildsList.Items.OfType<IThemeable>())
-            //{
-            //    themable.ChangeTheme();
-            //}
-
-            //foreach (IThemeable themable in messageViewer.Items.OfType<IThemeable>())
-            //{
-            //    themable.ChangeTheme();
-            //}
-
-            //foreach (Label label in usersList.Items.OfType<Label>())
-            //    label.Foreground = App.ForegroundBrush;
-        }
-
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            ChangeTheme();
-
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 WebSocketProvider = WS4NetProvider.Instance,
@@ -181,9 +149,6 @@ namespace DiscordWPF
 
             Client.JoinedGuild += Client_JoinedGuild;
             Client.LeftGuild += Client_LeftGuild;
-
-            Client.GuildAvailable += Client_GuildAvailable;
-            Client.GuildUnavailable += Client_GuildUnavailable;
 
             StatusShowWarning("Connecting...", autoHide: false);
 
@@ -222,7 +187,7 @@ namespace DiscordWPF
 
                 userName.Text = Client.CurrentUser.Username;
                 userDiscrim.Text = $"#{Client.CurrentUser.Discriminator}";
-                userProfile.ImageSource = new BitmapImage(new Uri(Client.CurrentUser.GetAvatarUrl()));
+                userProfile.ImageSource = Images.GetImage(Client.CurrentUser.GetAvatarUrl());
 
                 DMGuildViewer dms = new DMGuildViewer(Client.DMChannels);
                 GuildsList.Items.Add(dms);
@@ -238,8 +203,6 @@ namespace DiscordWPF
                 {
                     GuildViewer viewer = new GuildViewer(guild);
                     GuildsList.Items.Add(viewer);
-                    if (guild.Available)
-                        viewer.IsAvailable = true;
                 });
 
             }
@@ -258,7 +221,7 @@ namespace DiscordWPF
 
             if (selectedGuild.Id == arg.Id)
             {
-               await Reset();
+                await Reset();
             }
         }
 
@@ -273,34 +236,8 @@ namespace DiscordWPF
             {
                 userName.Text = arg2.Username;
                 userDiscrim.Text = $"#{arg2.Discriminator}";
-                userProfile.ImageSource = new BitmapImage(new Uri(arg2.GetAvatarUrl()));
+                userProfile.ImageSource = Images.GetImage(arg2.GetAvatarUrl());
             });
-        }
-
-        private async Task Client_GuildUnavailable(SocketGuild arg)
-        {
-            GuildViewer viewer = GuildsList.Items.OfType<GuildViewer>().FirstOrDefault(g => g.Guild.Id == arg.Id);
-            if (viewer != null)
-            {
-                await Dispatcher.InvokeAsync(() =>
-                {
-                    int index = GuildsList.Items.IndexOf(viewer);
-                    viewer.IsAvailable = false;
-                });
-            }
-        }
-
-        private async Task Client_GuildAvailable(SocketGuild arg)
-        {
-            GuildViewer viewer = GuildsList.Items.OfType<GuildViewer>().FirstOrDefault(g => g.Guild.Id == arg.Id);
-            if (viewer != null)
-            {
-                await Dispatcher.InvokeAsync(() =>
-                {
-                    int index = GuildsList.Items.IndexOf(viewer);
-                    viewer.IsAvailable = true;
-                });
-            }
         }
 
         private async Task Client_LoggedOut()
@@ -393,19 +330,19 @@ namespace DiscordWPF
             });
             if (selectedTextChannel != null && arg.Channel.Id == selectedTextChannel.Id)
             {
-                await Dispatcher.InvokeAsync(async () =>
+                MessageViewer viewer = null;
+                await Dispatcher.InvokeAsync(() =>
                 {
                     bool willScroll = CheckScroll();
-                    MessageViewer viewer = new MessageViewer(arg, selectedTextChannel);
+                    viewer = new MessageViewer(arg, selectedTextChannel);
                     messageViewer.Items.Add(viewer);
                     messageViewer.Items.RemoveAt(0);
-
-                    await CollapseMessage(viewer);
 
                     if (willScroll)
                         messageViewer.ScrollIntoView(viewer);
                 });
-
+                if (viewer != null)
+                    await CollapseMessage(viewer);
                 cache.Add(arg as IUserMessage);
             }
             else if (await Notify(arg))
@@ -524,19 +461,23 @@ namespace DiscordWPF
                 object item = items.FirstOrDefault(o => o is MessageViewer && (o as MessageViewer).IMessage.Id == arg2.Id);
                 index = (await Dispatcher.InvokeAsync(new Func<ItemCollection>(() => messageViewer.Items))).IndexOf(item);
 
+
                 if (index.HasValue)
-                    await Dispatcher.InvokeAsync(async () =>
+                {
+                    MessageViewer newViewer = null;
+                    await Dispatcher.InvokeAsync(() =>
                     {
                         try
                         {
                             messageViewer.Items.RemoveAt(index.Value);
                         }
                         catch { }
-                        MessageViewer newViewer = new MessageViewer(arg2, selectedTextChannel);
+                        newViewer = new MessageViewer(arg2, selectedTextChannel);
                         messageViewer.Items.Insert(index.Value, newViewer);
-                        await CollapseMessage(newViewer);
                     });
-
+                    if (newViewer != null)
+                        await CollapseMessage(newViewer);
+                }
                 cache.RemoveAll(m => m.Id == arg1.Id);
                 cache.Add(arg2 as IUserMessage);
             }
@@ -577,17 +518,20 @@ namespace DiscordWPF
         /// <returns></returns>
         private async Task Client_GuildUpdated(IGuild arg1, IGuild arg2)
         {
-            foreach (GuildEmote emote in arg1.Emotes)
+            await Task.Run(() =>
             {
-                if (AvailableEmotes.ContainsValue(emote))
-                    AvailableEmotes.Remove($"<:{emote.Name}:{emote.Id}>");
-            }
+                foreach (GuildEmote emote in arg1.Emotes)
+                {
+                    if (AvailableEmotes.ContainsValue(emote))
+                        AvailableEmotes.Remove($"<:{emote.Name}:{emote.Id}>");
+                }
 
-            foreach (GuildEmote emote in arg2.Emotes)
-            {
-                string emoteText = $"<:{emote.Name}:{emote.Id}>";
-                AvailableEmotes.Add(emoteText, emote);
-            }
+                foreach (GuildEmote emote in arg2.Emotes)
+                {
+                    string emoteText = $"<:{emote.Name}:{emote.Id}>";
+                    AvailableEmotes.Add(emoteText, emote);
+                }
+            });
         }
 
         bool CheckScroll()
@@ -886,7 +830,7 @@ namespace DiscordWPF
 
                     if ((channel as ITextChannel).Guild.IconUrl != null && App.Config.General.GuildImageWindowIcon)
                     {
-                        Icon = new BitmapImage(new Uri((channel as ITextChannel).Guild.IconUrl));
+                        Icon = Images.GetImage((channel as ITextChannel).Guild.IconUrl);
                         windowsTaskbar.SetOverlayIcon(Properties.Resources.app, selectedGuild.Name);
                     }
                     else
@@ -901,7 +845,7 @@ namespace DiscordWPF
 
                     if (App.Config.General.GuildImageWindowIcon && (channel as IDMChannel).Recipient.GetAvatarUrl() != null)
                     {
-                        Icon = new BitmapImage(new Uri((channel as IDMChannel).Recipient.GetAvatarUrl()));
+                        Icon = Images.GetImage((channel as IDMChannel).Recipient.GetAvatarUrl());
                         windowsTaskbar.SetOverlayIcon(Properties.Resources.app, selectedGuild?.Name);
                     }
                     else
@@ -976,8 +920,6 @@ namespace DiscordWPF
                         }, DispatcherPriority.Loaded);
                     }
 
-                    CollapseMessages();
-
                     await Dispatcher.InvokeAsync(() =>
                     {
                         if (offset != 0)
@@ -994,6 +936,8 @@ namespace DiscordWPF
 
                         loaded = true;
                     });
+
+                    await CollapseMessages();
                 }
                 else
                     StatusShowSuccess("No more messages!", true, true, false, FontAwesomeIcon.Check);
@@ -1016,12 +960,13 @@ namespace DiscordWPF
             }
         }
 
-        private void CollapseMessages()
+        private async Task CollapseMessages()
         {
-            Parallel.ForEach(messageViewer.Items.OfType<MessageViewer>(), options, async viewer =>
-             {
-                 await CollapseMessage(viewer);
-             });
+            IEnumerable<MessageViewer> items = messageViewer.Items.OfType<MessageViewer>();
+            foreach (MessageViewer viewer in items)
+            {
+                await CollapseMessage(viewer);
+            }
         }
 
         private async Task CollapseMessage(MessageViewer viewer)
@@ -1051,6 +996,8 @@ namespace DiscordWPF
                             }
                         }, DispatcherPriority.Background);
                     }
+
+                    await Dispatcher.InvokeAsync(() => viewer.Tag = true);
                 }
             }
             catch { }
@@ -1437,8 +1384,8 @@ namespace DiscordWPF
                         await Dispatcher.InvokeAsync(() =>
                         {
                             UserViewer view = new UserViewer(user);
-                            //view.IsEnabled = false;
-                            usersList.Items.Add(view);
+                        //view.IsEnabled = false;
+                        usersList.Items.Add(view);
                         }, DispatcherPriority.Input);
                         handledUsers.Add(user);
                     }
@@ -1621,7 +1568,7 @@ namespace DiscordWPF
             }
         }
 
-        private void messageTextBox_Paste(object sender, ExecutedRoutedEventArgs e)
+        private async void messageTextBox_PasteAsync(object sender, ExecutedRoutedEventArgs e)
         {
             e.Handled = true;
             if (Clipboard.ContainsText())
@@ -1641,14 +1588,14 @@ namespace DiscordWPF
                         encoder.Save(file);
                     }
 
-                    UploadFile(filePath);
+                    await UploadFile(filePath);
                 }
                 else if (Clipboard.ContainsFileDropList())
                 {
                     StringCollection files = Clipboard.GetFileDropList();
                     foreach (string file in files)
                     {
-                        UploadFile(file);
+                        await UploadFile(file);
                     }
 
                     return;
@@ -1675,7 +1622,7 @@ namespace DiscordWPF
                         string[] files = (string[])e.Data.GetData(DataFormats.FileDrop, true);
                         foreach (string file in files)
                         {
-                            UploadFile(file);
+                            await UploadFile(file);
                         }
 
                         return;
@@ -1771,7 +1718,13 @@ namespace DiscordWPF
         {
             if (App.Config.CachedNotifications.Any())
             {
-                await Dispatcher.InvokeAsync(() => notificationViewer.Children.Clear());
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    notificationViewer.Children.Clear();
+                    notificationViewerContainer.Visibility = Visibility.Collapsed;
+                    loadingNotifications.Visibility = Visibility.Visible;
+                    noNotifications.Visibility = Visibility.Collapsed;
+                });
 
                 IEnumerable<IGrouping<ulong, Notification>> guildSplit = await Task.Run(() =>
                 App.Config.CachedNotifications
@@ -1804,6 +1757,7 @@ namespace DiscordWPF
                             if (message != null)
                                 groupMessages.Add(message);
                         }
+                        await Task.Delay(50); // Fuck ratelimiting
                     }
                     if (groupMessages.Any())
                     {
@@ -1822,6 +1776,22 @@ namespace DiscordWPF
                         });
                     }
                 }
+
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    notificationViewerContainer.Visibility = Visibility.Visible;
+                    loadingNotifications.Visibility = Visibility.Collapsed;
+                    noNotifications.Visibility = Visibility.Collapsed;
+                });
+            }
+            else
+            {
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    notificationViewerContainer.Visibility = Visibility.Collapsed;
+                    loadingNotifications.Visibility = Visibility.Collapsed;
+                    noNotifications.Visibility = Visibility.Visible;
+                });
             }
         }
     }

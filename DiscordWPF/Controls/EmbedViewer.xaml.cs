@@ -28,6 +28,11 @@ namespace DiscordWPF.Controls
     /// </summary>
     public partial class EmbedViewer : UserControl
     {
+        Embed emb = null;
+        IMessage message = null;
+
+        private static readonly string[] videoEmbedExtensions = new string[] { ".mp4", ".mov", ".webm", ".wmv", ".avi", ".mkv" };
+
         public EmbedViewer(Attachment attach)
         {
             InitializeComponent();
@@ -42,7 +47,7 @@ namespace DiscordWPF.Controls
 
                 System.Windows.Controls.Image image = AddImageAttachment(attach.Url, attach.Width, attach.Height);
             }
-            else if (System.IO.Path.GetExtension(attach.Url) == ".mp4")
+            else if (videoEmbedExtensions.Contains(System.IO.Path.GetExtension(attach.Url)))
             {
                 titleText.Text = System.IO.Path.GetFileName(attach.Url);
 
@@ -106,7 +111,7 @@ namespace DiscordWPF.Controls
             }
             else
             {
-                image.Source = new BitmapImage(new Uri(url));
+                image.Source = Images.GetImage(url);
             }
             image.ContextMenu = GetAttachmentContextMenu(url);
 
@@ -140,6 +145,8 @@ namespace DiscordWPF.Controls
         public EmbedViewer(IMessage msg, Embed embed)
         {
             InitializeComponent();
+            emb = embed;
+            message = msg;
 
             titleText.Text = embed.Title;
             Margin = new Thickness(10, 10, 0, 0);
@@ -150,7 +157,7 @@ namespace DiscordWPF.Controls
                     if (string.IsNullOrEmpty(titleText.Text))
                         titleText.Text = embed.Author.Value.Name;
                     if (embed.Author.Value.IconUrl != null)
-                        titleImage.Source = new BitmapImage(new Uri(embed.Author.Value.IconUrl));
+                        titleImage.Source = Images.GetImage(embed.Author.Value.IconUrl);
                 }
                 catch { }
             }
@@ -161,20 +168,9 @@ namespace DiscordWPF.Controls
                 BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(embed.Color.Value.R, embed.Color.Value.G, embed.Color.Value.B));
             }
 
-            if (!string.IsNullOrEmpty(embed.Description))
-            {
-                description.Document = (FlowDocument)(Resources["TextToFlowDocumentConverter"] as TextToFlowDocumentConverter).Convert(embed.Description.Replace("\n", "\n\n"), typeof(FlowDocument), null, null);
-                if (msg != null && msg.Author is IGuildUser)
-                    Tools.FormatMessage(msg.Author as IGuildUser, msg, msg.Channel as ITextChannel, description, Dispatcher);
-            }
-            else
-            {
-                description.Visibility = Visibility.Collapsed;
-            }
-
             if (embed.Thumbnail.HasValue)
             {
-                thumbnailImage.Source = new BitmapImage(new Uri(embed.Thumbnail.Value.Url));
+                thumbnailImage.Source = Images.GetImage(embed.Thumbnail.Value.Url);
             }
             else
             {
@@ -222,7 +218,7 @@ namespace DiscordWPF.Controls
                 footerGrid.Visibility = Visibility.Visible;
                 footerText.Text = embed.Footer.Value.Text;
                 if (embed.Footer.Value.IconUrl != null)
-                    footerImage.Source = new BitmapImage(new Uri(embed.Footer.Value.IconUrl));
+                    footerImage.Source = Images.GetImage(embed.Footer.Value.IconUrl);
                 else
                     footerImage.Visibility = Visibility.Collapsed;
             }
@@ -245,6 +241,23 @@ namespace DiscordWPF.Controls
             menu.Items.Add(item);
 
             return menu;
-        }       
+        }
+
+        private async void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (emb != null)
+            {
+                if (!string.IsNullOrEmpty(emb.Description))
+                {
+                    description.Document = (FlowDocument)(App.Current.Resources["TextToFlowDocumentConverter"] as TextToFlowDocumentConverter).Convert(emb.Description.Replace("\n", "\n\n"), typeof(FlowDocument), null, null);
+                    if (message != null && message.Author is IGuildUser)
+                        await Tools.FormatMessage(message.Author as IGuildUser, message, message.Channel as ITextChannel, description, Dispatcher);
+                }
+                else
+                {
+                    description.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
     }
 }

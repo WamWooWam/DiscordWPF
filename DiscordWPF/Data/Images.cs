@@ -9,9 +9,32 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using System.Net.Cache;
 
 namespace DiscordWPF.Data
 {
+    public static class Images
+    {
+        public static BitmapImage GetImage(string url)
+        {
+            BitmapImage image = new BitmapImage();
+            image.BeginInit();
+            image.UriSource = new Uri(url);
+            image.CacheOption = BitmapCacheOption.OnDemand;
+            image.UriCachePolicy = new RequestCachePolicy(RequestCacheLevel.CacheIfAvailable);
+            image.DownloadCompleted += Image_DownloadCompleted;
+            Console.WriteLine($"Downloading {Path.GetFileName(url)}...");
+            image.EndInit();
+
+            return image;
+        }
+
+        private static void Image_DownloadCompleted(object sender, EventArgs e)
+        {
+            Console.WriteLine($"Downloaded {Path.GetFileName((sender as BitmapImage).UriSource.ToString())}!");
+        }
+    }
+
     public class ImageStore
     {
         public ImageStore(Discord.EmbedImage embed)

@@ -25,7 +25,7 @@ namespace DiscordWPF.Controls
     public partial class GuildViewer : ListViewItem
     {
         public IGuild Guild;
-        public bool IsAvailable { get; set; } = false;
+        public bool IsAvailable => Guild?.Available == true;
         int badgeCount = 0; 
 
         public GuildViewer(IGuild guild)
@@ -77,7 +77,7 @@ namespace DiscordWPF.Controls
                 {
                     guildName.Text = arg2.Name;
                     guildDescription.Text = "#" + channel.Name;
-                    guildImage.ImageSource = new BitmapImage(new Uri(Guild.IconUrl));
+                    guildImage.ImageSource = Images.GetImage(Guild.IconUrl);
                 });
             }
         }

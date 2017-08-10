@@ -64,7 +64,7 @@ namespace DiscordWPF.Controls
 
                     string url = (Channel as IDMChannel).Recipient.GetAvatarUrl();
                     if (url != null)
-                        channelIcon.ImageSource = new BitmapImage(new Uri(url));
+                        channelIcon.ImageSource = Images.GetImage(url);
                     else
                         channelIcon.ImageSource = App.Current.Resources["StockPFP"] as BitmapImage;
 
@@ -119,7 +119,7 @@ namespace DiscordWPF.Controls
 
                 string url = channel.Recipient.GetAvatarUrl();
                 if (url != null)
-                    channelIcon.ImageSource = new BitmapImage(new Uri(url));
+                    channelIcon.ImageSource = Images.GetImage(url);
                 else
                     channelIcon.ImageSource = App.Current.Resources["StockPFP"] as BitmapImage;
 

@@ -6,21 +6,7 @@
              xmlns:local="clr-namespace:DiscordWPF.Controls"
              xmlns:local1="clr-namespace:Markdown.Xaml;assembly=Markdown.Xaml"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300" Padding="10" MaxWidth="480" BorderBrush="#FF747171" Foreground="{DynamicResource ForegroundBrush}" Background="{DynamicResource SecondaryBackgroundBrush}">
-    <UserControl.Resources>
-        <local1:Markdown x:Key="Markdown"
-                        DocumentStyle="{StaticResource DocumentStyle}"
-                        Heading1Style="{StaticResource H1Style}"
-                        Heading2Style="{StaticResource H2Style}"
-                        Heading3Style="{StaticResource H3Style}"
-                        Heading4Style="{StaticResource H4Style}"
-                        LinkStyle="{StaticResource LinkStyle}"
-                        ImageStyle="{StaticResource ImageStyle}"
-                        SeparatorStyle="{StaticResource SeparatorStyle}"
-                         CodeStyle="{StaticResource CodeStyle}" />
-        <local1:TextToFlowDocumentConverter x:Key="TextToFlowDocumentConverter" x:Name="mdConverter"
-                                           Markdown="{StaticResource Markdown}"/>
-    </UserControl.Resources>
+             d:DesignHeight="300" d:DesignWidth="300" Padding="10" MaxWidth="480" BorderBrush="#FF747171" Foreground="{DynamicResource ForegroundBrush}" Background="{DynamicResource SecondaryBackgroundBrush}" Loaded="UserControl_Loaded">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>

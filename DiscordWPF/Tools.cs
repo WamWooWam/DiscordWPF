@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using DiscordWPF.Data;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
@@ -393,7 +394,7 @@ namespace DiscordWPF
                                 {
                                     tr.Text = "";
                                     System.Windows.Controls.Image img = new System.Windows.Controls.Image();
-                                    img.Source = new BitmapImage(new Uri(emote.Value.Url));
+                                    img.Source = Images.GetImage(emote.Value.Url);
                                     img.Stretch = Stretch.Uniform;
                                     img.Height = 20;
                                     new InlineUIContainer(img, tp);

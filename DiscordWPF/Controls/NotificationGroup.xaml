@@ -6,7 +6,8 @@
              xmlns:local="clr-namespace:DiscordWPF.Controls"
              mc:Ignorable="d" 
               Background="{DynamicResource BackgroundBrush}"
-             d:DesignHeight="300" d:DesignWidth="300">
+             Foreground="{DynamicResource ForegroundBrush}"
+             d:DesignHeight="300" Width="300" MaxWidth="300" MaxHeight="300" d:DesignWidth="300">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
@@ -23,7 +24,7 @@
                     <ImageBrush x:Name="sourceImage" ImageSource="{DynamicResource StockPFP}"></ImageBrush>
                 </Ellipse.Fill>
             </Ellipse>
-            <TextBlock x:Name="sourceTitle" Grid.Column="1" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="14" FontWeight="Bold">Username</TextBlock>
+            <TextBlock x:Name="sourceTitle" Grid.Column="1" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ForegroundBrush}">Username</TextBlock>
         </Grid>
         <Grid Name="messageViewContainer" Grid.Row="1" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
             <ListView x:Name="messageViewer" ScrollViewer.CanContentScroll="False" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Foreground="{DynamicResource ForegroundBrush}" Background="{DynamicResource SecondaryBackgroundBrush}" BorderBrush="#00000000"></ListView>

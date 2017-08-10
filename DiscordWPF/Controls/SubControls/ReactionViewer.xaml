@@ -1,0 +1,21 @@
+﻿<ToggleButton x:Class="DiscordWPF.Controls.SubControls.ReactionViewer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DiscordWPF.Controls.SubControls"
+             mc:Ignorable="d" Margin="2.5,0,2.5,0" Style="{StaticResource {x:Type ToggleButton}}">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="16"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0">
+            <TextBlock x:Name="emoteText" FontSize="13" TextAlignment="Center"></TextBlock>
+            <Image x:Name="emoteImage"></Image>
+        </Grid>
+        <Grid Grid.Column="1">
+            <TextBlock x:Name="emoteCount" Margin="2,0,0,0" TextAlignment="Center" FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Left">0</TextBlock>
+        </Grid>
+    </Grid>
+</ToggleButton>

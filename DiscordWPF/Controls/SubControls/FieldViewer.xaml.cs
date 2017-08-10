@@ -24,9 +24,15 @@ namespace DiscordWPF.Controls
     /// </summary>
     public partial class FieldViewer : UserControl
     {
+        IMessage message;
+        EmbedField embField;
+
         public FieldViewer(IMessage msg, EmbedField field)
         {
             InitializeComponent();
+
+            message = msg;
+            embField = field;
 
             if (field.Name != null)
                 Title.Text = field.Name;
@@ -34,12 +40,16 @@ namespace DiscordWPF.Controls
                 Title.Visibility = Visibility.Hidden;
 
             if (field.Value != null)
-                Content.Document = (FlowDocument)(Resources["TextToFlowDocumentConverter"] as TextToFlowDocumentConverter).Convert(field.Value, typeof(FlowDocument), null, null);
+                Content.Document = (FlowDocument)(App.Current.Resources["TextToFlowDocumentConverter"] as TextToFlowDocumentConverter).Convert(field.Value, typeof(FlowDocument), null, null);
             else
-                Content.Visibility = Visibility.Hidden;
-           
-            if (msg != null && msg.Author is IGuildUser)
-                Tools.FormatMessage(msg.Author as IGuildUser, msg, msg.Channel as ITextChannel, Content, Dispatcher, field.Value);
+                Content.Visibility = Visibility.Hidden;          
+            
+        }
+
+        private async void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (message != null && message.Author is IGuildUser)
+                await Tools.FormatMessage(message.Author as IGuildUser, message, message.Channel as ITextChannel, Content, Dispatcher, embField.Value);
         }
     }
 }

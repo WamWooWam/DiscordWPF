@@ -41,7 +41,7 @@ namespace DiscordWPF.Controls.SubControls
             Loaded += MediaPlayer_Loaded;
 
             Url = url;
-            thumbnail.Source = new BitmapImage(new Uri(thumbnailUrl));
+            thumbnail.Source = Images.GetImage(thumbnailUrl);
 
             media.IsMuted = true;
             media.BufferingStarted += Media_BufferingStarted;

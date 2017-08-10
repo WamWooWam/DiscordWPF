@@ -40,7 +40,7 @@ namespace DiscordWPF.Dialogs
             userTitle.Text = Tools.Name(user);
             userSubtitle.Text = $"@{user.Username}#{user.Discriminator}";
 
-            userImage.ImageSource = new BitmapImage(new Uri(user.GetAvatarUrl()));
+            userImage.ImageSource = Images.GetImage(user.GetAvatarUrl());
 
             userGame.Text = "";
 

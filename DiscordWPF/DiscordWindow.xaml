@@ -11,14 +11,14 @@
         Title="Discord WPF" Height="480" Width="640" AllowDrop="True" Loaded="Window_Loaded" Closing="mainWindow_Closing" Drop="mainWindow_Drop" DragEnter="mainWindow_DragEnter" DragLeave="mainWindow_DragLeave" MouseUp="mainWindow_MouseUp">
     <Window.Resources>
         <Storyboard x:Key="AnimateShow">
-            <DoubleAnimation Storyboard.TargetName="notificationContainer" Storyboard.TargetProperty="(FrameworkElement.Height)" From="0" To="30"  Duration="0:0:0.5" >
+            <DoubleAnimation Storyboard.TargetName="notificationContainer" Storyboard.TargetProperty="(FrameworkElement.Height)" From="0" To="26"  Duration="0:0:0.5" >
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseInOut"></CubicEase>
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
         </Storyboard>
         <Storyboard x:Key="AnimateHide">
-            <DoubleAnimation Storyboard.TargetName="notificationContainer" Storyboard.TargetProperty="(FrameworkElement.Height)" From="30" To="0" Duration="0:0:0.5">
+            <DoubleAnimation Storyboard.TargetName="notificationContainer" Storyboard.TargetProperty="(FrameworkElement.Height)" From="26" To="0" Duration="0:0:0.5">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseInOut"></CubicEase>
                 </DoubleAnimation.EasingFunction>
@@ -181,7 +181,7 @@
                         </ToggleButton.ToolTip>
                         <fa:ImageAwesome Icon="Bell" Foreground="{DynamicResource ForegroundBrush}" Width="24" Height="24"></fa:ImageAwesome>
                     </ToggleButton>
-                    <Popup IsOpen="{Binding IsChecked, ElementName=notificationButton}" PlacementTarget="{Binding ElementName=notificationButton}" x:Name="notifications">
+                    <Popup MaxHeight="350" IsOpen="{Binding IsChecked, ElementName=notificationButton}" PlacementTarget="{Binding ElementName=notificationButton}" x:Name="notifications">
                         <Grid Background="{DynamicResource SecondaryBackgroundBrush}">
                             <Grid Margin="10">
                                 <Grid.RowDefinitions>
@@ -189,16 +189,22 @@
                                     <RowDefinition Height="1*"/>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
-                                <TextBlock FontSize="16" FontWeight="Bold">Notifications</TextBlock>
-                                <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                                <TextBlock FontSize="16" FontWeight="Bold" Margin="0,0,0,5">Notifications</TextBlock>
+                                <ScrollViewer x:Name="notificationViewerContainer" Visibility="Collapsed" Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                                     <StackPanel x:Name="notificationViewer" ScrollViewer.CanContentScroll="False">
-                                        <StackPanel x:Name="noNotifications">
-                                            <TextBlock FontSize="16" FontWeight="Bold" Margin="10,10,10,2.5" HorizontalAlignment="Center">No new notifications</TextBlock>
-                                            <TextBlock Margin="0,0,0,10" HorizontalAlignment="Center">Check back later.</TextBlock>
-                                        </StackPanel>
                                     </StackPanel>
                                 </ScrollViewer>
-                                <TextBlock Grid.Row="2">Manage your notifications in <Hyperlink x:Name="settingsHyperlink">settings</Hyperlink>.</TextBlock>
+
+                                <StackPanel Visibility="Collapsed" Grid.Row="1" x:Name="noNotifications">
+                                    <TextBlock FontSize="16" FontWeight="Bold" Margin="10,10,10,2.5" HorizontalAlignment="Center">No new notifications</TextBlock>
+                                    <TextBlock Margin="0,0,0,10" HorizontalAlignment="Center">Check back later.</TextBlock>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Visibility="Visible" Grid.Row="1" x:Name="loadingNotifications" Margin="5">
+                                    <fa:ImageAwesome Icon="Cog" Spin="True" Width="24"></fa:ImageAwesome>
+                                    <Label FontSize="16" FontWeight="Bold">Loading...</Label>
+                                </StackPanel>
+                                <TextBlock Grid.Row="2" Margin="0,5,0,0">Manage your notifications in <Hyperlink x:Name="settingsHyperlink">settings</Hyperlink>.</TextBlock>
                             </Grid>
                         </Grid>
                     </Popup>
@@ -228,12 +234,21 @@
                 </StackPanel>
             </Grid>
 
-            <Grid Name="messageViewContainer" Grid.Row="1" ScrollViewer.CanContentScroll="True" ScrollViewer.ScrollChanged="ScrollViewer_ScrollChanged" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                <ListView x:Name="messageViewer" ScrollViewer.CanContentScroll="False" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Foreground="{DynamicResource ForegroundBrush}" Background="{DynamicResource BackgroundBrush}" BorderBrush="#00000000"></ListView>
+            <Grid Grid.Row="1">
+                <Grid Name="messageViewContainer" ScrollViewer.CanContentScroll="True" ScrollViewer.ScrollChanged="ScrollViewer_ScrollChanged" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListView x:Name="messageViewer" ScrollViewer.CanContentScroll="False" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Foreground="{DynamicResource ForegroundBrush}" Background="{DynamicResource BackgroundBrush}" BorderBrush="#00000000"></ListView>
+                </Grid>
+                <Grid x:Name="typingContainer" Height="0" VerticalAlignment="Bottom">
+                    <Border Background="{DynamicResource SecondaryBackgroundBrush}" Opacity="0.75"/>
+                    <TextBlock x:Name="typingViewer" Margin="10,5,10,5" Foreground="{DynamicResource ForegroundBrush}">
+                        <TextBlock.Effect>
+                            <DropShadowEffect Color="{DynamicResource Background}" ShadowDepth="1.5" BlurRadius="1"/>
+                        </TextBlock.Effect>
+                        Text
+                    </TextBlock>
+                </Grid>
             </Grid>
-            <Grid x:Name="typingContainer" Grid.Row="2" Grid.Height="0">
-                <TextBlock x:Name="typingViewer" Margin="10,5,10,0" Foreground="{DynamicResource ForegroundBrush}"></TextBlock>
-            </Grid>
+
             <Grid x:Name="mainContentGrid" IsEnabled="False" Grid.Row="3" Margin="10,0,-1,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>

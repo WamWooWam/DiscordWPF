@@ -5,7 +5,8 @@
              xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero" x:Class="DiscordWPF.App"
             xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:fa="http://schemas.fontawesome.io/icons/"
-             Startup="Application_Startup">
+    xmlns:local1="clr-namespace:Markdown.Xaml;assembly=Markdown.Xaml"
+    Startup="Application_Startup">
     <Application.Resources>
 
         <BitmapImage x:Key="StockPFP" UriSource="./Assets/Stock.png" />
@@ -24,11 +25,17 @@
         <SolidColorBrush x:Key="DarkSecondaryBrush" Color="#FF282828"/>
         <SolidColorBrush x:Key="DarkSelectedBackgroundBrush" Color="#FF414141"/>
 
-        <SolidColorBrush x:Key="ForegroundBrush" Color="Black"/>
-        <SolidColorBrush x:Key="SecondaryForegroundBrush" Color="DarkGray"/>
-        <SolidColorBrush x:Key="BackgroundBrush" Color="White"/>
-        <SolidColorBrush x:Key="SecondaryBackgroundBrush" Color="LightGray"/>
-        <SolidColorBrush x:Key="SelectedBackgroundBrush" Color="Gray"/>
+        <Color x:Key="Foreground">#FF000000</Color>
+        <Color x:Key="SecondaryForeground">#FFA9A9A9</Color>
+        <Color x:Key="Background">#FFFFFFFF</Color>
+        <Color x:Key="SecondaryBackground">#FFD3D3D3</Color>
+        <Color x:Key="SelectedBackground">#FF808080</Color>
+
+        <SolidColorBrush x:Key="ForegroundBrush" Color="{DynamicResource Foreground}"/>
+        <SolidColorBrush x:Key="SecondaryForegroundBrush" Color="{DynamicResource SecondaryForeground}"/>
+        <SolidColorBrush x:Key="BackgroundBrush" Color="{DynamicResource Background}"/>
+        <SolidColorBrush x:Key="SecondaryBackgroundBrush" Color="{DynamicResource SecondaryBackground}"/>
+        <SolidColorBrush x:Key="SelectedBackgroundBrush" Color="{DynamicResource SelectedBackground}"/>
 
         <SolidColorBrush x:Key="SuccessBrush" Color="Green"/>
         <SolidColorBrush x:Key="WarningBrush" Color="Orange"/>
@@ -66,6 +73,9 @@
                     <RemoveStoryboard BeginStoryboardName="OnMouseLeaveStoryboard_BeginStoryboard"/>
                 </EventTrigger>
             </Style.Triggers>
+            <Style.Setters>
+                <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+            </Style.Setters>
         </Style>
 
         <Style x:Key="H1Style"
@@ -143,6 +153,20 @@
         </Style>
 
         <Style x:Key="SeparatorStyle" TargetType="{x:Type Line}"/>
+
+        <local1:Markdown x:Key="Markdown"
+                        DocumentStyle="{DynamicResource DocumentStyle}"
+                        Heading1Style="{DynamicResource H1Style}"
+                        Heading2Style="{DynamicResource H2Style}"
+                        Heading3Style="{DynamicResource H3Style}"
+                        Heading4Style="{DynamicResource H4Style}"
+                        LinkStyle="{DynamicResource LinkStyle}"
+                        ImageStyle="{DynamicResource ImageStyle}"
+                        SeparatorStyle="{DynamicResource SeparatorStyle}"
+                         CodeStyle="{DynamicResource CodeStyle}" />
+        <local1:TextToFlowDocumentConverter x:Key="TextToFlowDocumentConverter" x:Name="mdConverter"
+                                           Markdown="{DynamicResource Markdown}"/>
+
         <Style x:Key="FocusVisual">
             <Setter Property="Control.Template">
                 <Setter.Value>
@@ -155,6 +179,32 @@
 
 
         <Style TargetType="{x:Type Button}">
+            <Style.Resources>
+                <Storyboard x:Key="MouseEnterBackground">
+                    <DoubleAnimation Storyboard.TargetName="deselected" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.25">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseInOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    <DoubleAnimation Storyboard.TargetName="selected" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.25">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseInOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                </Storyboard>
+                <Storyboard x:Key="MouseLeaveBackground">
+                    <DoubleAnimation Storyboard.TargetName="selected" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.25">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseInOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    <DoubleAnimation Storyboard.TargetName="deselected" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.25">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseInOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                </Storyboard>
+            </Style.Resources>
             <Setter Property="Background" Value="{DynamicResource BackgroundBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource SecondaryForegroundBrush}"/>
             <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
@@ -166,6 +216,51 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
+                        <Grid>
+                            <Border x:Name="deselected" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}" Background="{TemplateBinding Background}" Opacity="1"></Border>
+                            <Border x:Name="selected" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{DynamicResource ForegroundBrush}" Background="{DynamicResource SelectedBackgroundBrush}" Opacity="0"></Border>
+                            <Border x:Name="border" SnapsToDevicePixels="true">
+                                <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard x:Name="OnMouseEnterStoryboard_BeginStoryboard" Storyboard="{StaticResource MouseEnterBackground}"/>
+                                    <RemoveStoryboard BeginStoryboardName="OnMouseLeaveStoryboard_BeginStoryboard"/>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <RemoveStoryboard BeginStoryboardName="OnMouseEnterStoryboard_BeginStoryboard"/>
+                                    <BeginStoryboard x:Name="OnMouseLeaveStoryboard_BeginStoryboard" Storyboard="{StaticResource MouseLeaveBackground}"/>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="true">
+                                <Setter Property="Background" TargetName="border" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource ForegroundBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Background" TargetName="border" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource SecondaryForegroundBrush}"/>
+                                <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{DynamicResource SecondaryForegroundBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="{x:Type ToggleButton}" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Background" Value="{DynamicResource BackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SecondaryForegroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
+            <Setter Property="FontFamily" Value="{DynamicResource Font}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
                         <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="true">
                             <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                         </Border>
@@ -183,6 +278,12 @@
                                 <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource SecondaryForegroundBrush}"/>
                                 <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{DynamicResource SecondaryForegroundBrush}"/>
                             </Trigger>
+                            <Trigger Property="IsChecked" Value="true">
+                                <Setter Property="Background" Value="{DynamicResource SelectedBackgroundBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="false">
+                                <Setter Property="Background" Value="{DynamicResource BackgroundBrush}"/>
+                            </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
@@ -190,6 +291,32 @@
         </Style>
 
         <Style x:Key="TextBoxStyle">
+            <Style.Resources>
+                <Storyboard x:Key="MouseEnterBackground">
+                    <DoubleAnimation Storyboard.TargetName="deselected" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.25">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseInOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    <DoubleAnimation Storyboard.TargetName="selected" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.25">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseInOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                </Storyboard>
+                <Storyboard x:Key="MouseLeaveBackground">
+                    <DoubleAnimation Storyboard.TargetName="selected" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.25">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseInOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    <DoubleAnimation Storyboard.TargetName="deselected" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.25">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseInOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                </Storyboard>
+            </Style.Resources>
             <Setter Property="Control.Background" Value="{DynamicResource BackgroundBrush}"/>
             <Setter Property="Control.BorderBrush" Value="{DynamicResource SecondaryForegroundBrush}"/>
             <Setter Property="Control.Foreground" Value="{DynamicResource ForegroundBrush}"/>
@@ -205,9 +332,13 @@
             <Setter Property="Control.Template">
                 <Setter.Value>
                     <ControlTemplate>
-                        <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
-                            <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
-                        </Border>
+                        <Grid>
+                            <Border x:Name="deselected" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}" Background="{TemplateBinding Background}" Opacity="1"></Border>
+                            <Border x:Name="selected" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{DynamicResource ForegroundBrush}" Background="{DynamicResource SelectedBackgroundBrush}" Opacity="0"></Border>
+                            <Border x:Name="border" SnapsToDevicePixels="True">
+                                <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
+                            </Border>
+                        </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsEnabled" Value="false">
                                 <Setter Property="Background" TargetName="border" Value="{DynamicResource SecondaryBackgroundBrush}"/>
@@ -215,12 +346,24 @@
                                 <Setter Property="Foreground" Value="{DynamicResource SecondaryForegroundBrush}"/>
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="true">
-                                <Setter Property="Background" TargetName="border" Value="{DynamicResource SelectedBackgroundBrush}"/>
-                                <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource ForegroundBrush}"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard x:Name="OnMouseEnterStoryboard_BeginStoryboard" Storyboard="{StaticResource MouseEnterBackground}"/>
+                                    <RemoveStoryboard BeginStoryboardName="OnMouseLeaveStoryboard_BeginStoryboard"/>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <RemoveStoryboard BeginStoryboardName="OnMouseEnterStoryboard_BeginStoryboard"/>
+                                    <BeginStoryboard x:Name="OnMouseLeaveStoryboard_BeginStoryboard" Storyboard="{StaticResource MouseLeaveBackground}"/>
+                                </Trigger.ExitActions>
                             </Trigger>
                             <Trigger Property="IsKeyboardFocused" Value="true">
-                                <Setter Property="Background" TargetName="border" Value="{DynamicResource SelectedBackgroundBrush}"/>
-                                <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource ForegroundBrush}"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard x:Name="OnKeyboardFocusStoryboard_BeginStoryboard" Storyboard="{StaticResource MouseEnterBackground}"/>
+                                    <RemoveStoryboard BeginStoryboardName="OnKeyboardUnfocusStoryboard_BeginStoryboard"/>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <RemoveStoryboard BeginStoryboardName="OnKeyboardFocusStoryboard_BeginStoryboard"/>
+                                    <BeginStoryboard x:Name="OnKeyboardUnfocusStoryboard_BeginStoryboard" Storyboard="{StaticResource MouseLeaveBackground}"/>
+                                </Trigger.ExitActions>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -244,7 +387,7 @@
             </Style.Triggers>
         </Style>
         <Style TargetType="{x:Type fa:ImageAwesome}">
-            <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Control}}}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="VerticalAlignment" Value="Stretch" />
         </Style>
@@ -256,6 +399,33 @@
         </Style>
 
         <Style x:Key="listViewItemStyle" TargetType="{x:Type ListViewItem}">
+            <Style.Resources>
+                <Storyboard x:Key="MouseEnterBackground">
+                    <DoubleAnimation Storyboard.TargetName="deselected" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.25">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseInOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    <DoubleAnimation Storyboard.TargetName="selected" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.25">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseInOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                </Storyboard>
+                <Storyboard x:Key="MouseLeaveBackground">
+                    <DoubleAnimation Storyboard.TargetName="selected" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.25">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseInOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    <DoubleAnimation Storyboard.TargetName="deselected" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.25">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseInOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                </Storyboard>
+            </Style.Resources>
+            
             <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="Padding" Value="4,1"/>
             <Setter Property="HorizontalContentAlignment" Value="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
@@ -267,15 +437,26 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type ListViewItem}">
-                        <Border x:Name="Bd" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
-                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                        </Border>
+                        <Grid>
+                            <Border x:Name="deselected" Background="{TemplateBinding Background}" Opacity="1"></Border>
+                            <Border x:Name="selected" Background="{DynamicResource SelectedBackgroundBrush}" Opacity="0"></Border>
+                            <Border x:Name="Bd" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
+                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            </Border>
+                        </Grid>
                         <ControlTemplate.Triggers>
                             <MultiTrigger>
                                 <MultiTrigger.Conditions>
                                     <Condition Property="IsMouseOver" Value="True"/>
                                 </MultiTrigger.Conditions>
-                                <Setter Property="Background" TargetName="Bd" Value="{DynamicResource SelectedBackgroundBrush}"/>
+                                <MultiTrigger.EnterActions>
+                                    <BeginStoryboard x:Name="OnMouseEnterStoryboard_BeginStoryboard" Storyboard="{StaticResource MouseEnterBackground}"/>
+                                    <RemoveStoryboard BeginStoryboardName="OnMouseLeaveStoryboard_BeginStoryboard"/>
+                                </MultiTrigger.EnterActions>
+                                <MultiTrigger.ExitActions>
+                                    <RemoveStoryboard BeginStoryboardName="OnMouseEnterStoryboard_BeginStoryboard"/>
+                                    <BeginStoryboard x:Name="OnMouseLeaveStoryboard_BeginStoryboard" Storyboard="{StaticResource MouseLeaveBackground}"/>
+                                </MultiTrigger.ExitActions>
                                 <Setter Property="BorderBrush" TargetName="Bd" Value="{DynamicResource SelectedBackgroundBrush}"/>
                             </MultiTrigger>
                             <MultiTrigger>
@@ -464,7 +645,10 @@
                 </Trigger>
             </ControlTemplate.Triggers>
         </ControlTemplate>
+        
+        
         <SolidColorBrush x:Key="TextBox.Static.Background" Color="#FFFFFFFF"/>
+        
         <Style TargetType="{x:Type ComboBox}">
             <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}"/>
             <Setter Property="Background" Value="{DynamicResource BackgroundBrush}"/>
@@ -949,5 +1133,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+
     </Application.Resources>
 </Application>

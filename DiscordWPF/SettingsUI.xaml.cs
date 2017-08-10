@@ -105,7 +105,6 @@ namespace DiscordWPF
         {
             if (themeSaved == false)
             {
-                App.DiscordWindow.ChangeTheme();
                 ChangeTheme();
             }
         }
@@ -272,9 +271,6 @@ namespace DiscordWPF
                 editingTheme.Font = (fontComboBox.SelectedItem as ComboBoxItem).FontFamily;
 
             themeSaved = false;
-
-            App.DiscordWindow.ChangeTheme();
-            ChangeTheme();
         }
 
         private void themeSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -307,7 +303,6 @@ namespace DiscordWPF
                 }
             }
 
-            App.DiscordWindow.ChangeTheme();
             ChangeTheme();
         }
 

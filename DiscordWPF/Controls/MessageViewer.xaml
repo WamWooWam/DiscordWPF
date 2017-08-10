@@ -9,19 +9,7 @@
               xmlns:fa="http://schemas.fontawesome.io/icons/"
               mc:Ignorable="d" 
              d:DesignHeight="46" Loaded="copyMessageId_Loaded" MouseUp="ListViewItem_MouseUp" Margin="0,0,3,0">
-    <ListViewItem.Resources>
-        <local1:Markdown x:Key="Markdown"
-                        DocumentStyle="{StaticResource DocumentStyle}"
-                        Heading1Style="{StaticResource H1Style}"
-                        Heading2Style="{StaticResource H2Style}"
-                        Heading3Style="{StaticResource H3Style}"
-                        Heading4Style="{StaticResource H4Style}"
-                        LinkStyle="{StaticResource LinkStyle}"
-                        ImageStyle="{StaticResource ImageStyle}"
-                        SeparatorStyle="{StaticResource SeparatorStyle}"
-                         CodeStyle="{StaticResource CodeStyle}" />
-        <local1:TextToFlowDocumentConverter x:Key="TextToFlowDocumentConverter" x:Name="mdConverter"
-                                           Markdown="{StaticResource Markdown}"/>
+    <ListViewItem.Resources>       
 
         <Style x:Key="{x:Type TextBoxBase}" TargetType="{x:Type TextBoxBase}">
             <Setter Property="Background" Value="Transparent"/>
@@ -126,9 +114,12 @@
         </ContextMenu>
     </ListViewItem.ContextMenu>
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="32"/>
-            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>            
         </Grid.ColumnDefinitions>
 
         <Ellipse x:Name="imageContainer" VerticalAlignment="Top" Height="32px">
@@ -139,6 +130,7 @@
 
         <Grid x:Name="mainGrid" Grid.Column="1">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -158,7 +150,9 @@
                     
                 </TextBox>
             </Grid>
+            <WrapPanel Margin="5,0,5,0" x:Name="reactionPanel" Grid.Row="2" Orientation="Horizontal">
 
+            </WrapPanel>
         </Grid>
     </Grid>
 </ListViewItem>
