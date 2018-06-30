@@ -1,0 +1,26 @@
+﻿<Window x:Class="DiscordWPF.Windows.ChannelWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DiscordWPF.Windows"
+        xmlns:effects="clr-namespace:DiscordWPF.Effects"
+        mc:Ignorable="d" Style="{DynamicResource WindowStyle}"
+        Title="{Binding Content.Title, ElementName=rootFrame, FallbackValue=DiscordWPF}"
+        Height="450" Width="800" WindowStartupLocation="Manual" Loaded="Window_Loaded"
+        MouseEnter="MiniMode_MouseEnter" MouseLeave="MiniMode_MouseLeave" LocationChanged="Window_LocationChanged">
+    <Grid>
+        <Rectangle
+            x:Name="backdrop"
+            Visibility="Hidden"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            Fill="{DynamicResource SystemChromeLowBrush}"
+            Opacity="0.66">
+            <Rectangle.Effect>
+                <effects:NoiseEffect  Ratio="0.25" />
+            </Rectangle.Effect>
+        </Rectangle>
+        <Frame x:Name="rootFrame" Navigating="rootFrame_Navigating" Navigated="rootFrame_Navigated" NavigationUIVisibility="Hidden"/>
+    </Grid>
+</Window>

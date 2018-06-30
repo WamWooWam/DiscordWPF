@@ -1,0 +1,9 @@
+[submodule "WamWooWam.Wpf"]
+	path = WamWooWam.Wpf
+	url = https://github.com/WamWooWam/WamWooWam.Wpf
+[submodule "DSharpPlus"]
+	path = DSharpPlus
+	url = https://github.com/WamWooWam/DSharpPlus
+[submodule "WamWooWam.Core"]
+	path = WamWooWam.Core
+	url = https://github.com/WamWooWam/WamWooWam.Core
