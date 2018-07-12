@@ -15,8 +15,9 @@
 
             <converters:WindowTitleConverter x:Key="TitleConverter"/>
             
-            <FontFamily x:Key="SegoeMDL2" >./Assets/segmdl2.ttf#Segoe MDL2 Assets</FontFamily>
-
+            <FontFamily x:Key="SegoeMDL2">./Assets/segmdl2.ttf#Segoe MDL2 Assets</FontFamily>
+            <BitmapImage x:Key="AudioFile">./Assets/AudioFile.png</BitmapImage>
+            
             <Style x:Key="IconButtonStyle" BasedOn="{StaticResource {x:Type Button}}" TargetType="Button">
                 <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="Padding" Value="12,4"/>

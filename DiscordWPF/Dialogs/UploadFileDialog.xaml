@@ -1,0 +1,45 @@
+﻿<Window x:Class="DiscordWPF.Dialogs.UploadFileDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DiscordWPF.Dialogs"
+        xmlns:wam="clr-namespace:WamWooWam.Wpf.Utilities;assembly=WamWooWam.Wpf"  
+        mc:Ignorable="d" Style="{DynamicResource WindowStyle}"
+        Title="Uploading" MinHeight="175" Width="420"
+        ResizeMode="NoResize" WindowStartupLocation="CenterOwner" SizeToContent="Height"
+        Loaded="Window_Loaded">
+    <Grid  Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <Image x:Name="thumbnailImage" Width="96" Height="96" VerticalAlignment="Center"/>
+            <Grid Grid.Column="1" VerticalAlignment="Center" Margin="15,0,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock x:Name="titleTextBox" Margin="0,10" Style="{DynamicResource SubtitleTextBlockStyle}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Text="Uploading image.png"/>
+                <TextBox x:Name="commentTextBox" Grid.Row="1" AcceptsReturn="True" TextWrapping="Wrap">
+                    <wam:PlaceholderService.Placeholder>
+                        <TextBlock Text="Add a comment (optional)" Margin="2" Foreground="{DynamicResource SystemBaseMediumHighBrush}"/>
+                    </wam:PlaceholderService.Placeholder>
+                </TextBox>
+            </Grid>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Button Content="Cancel" Margin="0,0,5,0" Click="Cancel_Clicked"/>
+            <Button Grid.Column="1" Margin="5,0,0,0" Style="{DynamicResource AccentButtonStyle}" Content="Upload" Click="Upload_Clicked"/>
+        </Grid>
+    </Grid>
+</Window>

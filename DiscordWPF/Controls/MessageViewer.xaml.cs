@@ -74,10 +74,10 @@ namespace DiscordWPF.Controls
         private static MarkdownPipeline CreateMarkdownPipeline()
         {
             var builder = new MarkdownPipelineBuilder()
-                .UseEmphasisExtras(EmphasisExtraOptions.Strikethrough)
                 .UseSoftlineBreakAsHardlineBreak()
-                .Use<DiscordMarkdownExtension>()
                 .UseAutoLinks()
+                .UseEmphasisExtras(EmphasisExtraOptions.Strikethrough)
+                .Use<DiscordMarkdownExtension>()
                 .DisableHtml();
 
             builder.BlockParsers.RemoveAll(p => p is QuoteBlockParser);

@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,8 +15,12 @@ using Microsoft.Toolkit.Uwp.Notifications;
 using WamWooWam.Core;
 using WamWooWam.Wpf;
 using Windows.Data.Xml.Dom;
+using Windows.Foundation;
+using Windows.Media.MediaProperties;
+using Windows.Media.Transcoding;
 using Windows.Security.Credentials;
 using Windows.UI.Notifications;
+using Windows.Web.Http;
 
 namespace DiscordWPF.Abstractions
 {
@@ -108,6 +111,54 @@ namespace DiscordWPF.Abstractions
                 _toastNotifier.Value.Hide(notif);
             }
         }
+        
+        public async Task SendFileWithProgressAsync(DiscordChannel channel, string message, Stream file, string fileName, IProgress<double?> progress)
+        {
+            using (var client = new HttpClient())
+            {
+                HttpRequestMessage httpRequestMessage
+                    = new HttpRequestMessage(HttpMethod.Post, new Uri("https://discordapp.com/api/v7" + string.Format("/channels/{0}/messages", channel.Id)));
+                httpRequestMessage.Headers.Add("Authorization", Utilities.GetFormattedToken(channel.Discord));
+
+                httpRequestMessage.Content = new HttpMultipartFormDataContent
+                {
+                    { new HttpStringContent(message), "content" },
+                    { new HttpStreamContent(file.AsInputStream()), "file", fileName }
+                };
+
+                var send = client.SendRequestAsync(httpRequestMessage);
+                send.Progress += new AsyncOperationProgressHandler<HttpResponseMessage, HttpProgress>((o, e) =>
+                {
+                    progress.Report((e.BytesSent / (double)e.TotalBytesToSend) * 100);
+                });
+
+                await send;
+
+            }
+        }
+
+        internal static TranscodeFailureReason LastTranscodeFailureReason { get; private set; }
+
+        internal async Task<bool> TryTranscodeAudioAsync(Stream inStream, MemoryStream outStream)
+        {
+            var transcoder = new MediaTranscoder();
+            var prepare = await transcoder.PrepareStreamTranscodeAsync(
+                inStream.AsRandomAccessStream(),
+                outStream.AsRandomAccessStream(),
+                MediaEncodingProfile.CreateMp3(AudioEncodingQuality.High)
+                );
+
+            if (prepare.CanTranscode)
+            {
+                await prepare.TranscodeAsync();
+                return true;
+            }
+            else
+            {
+                LastTranscodeFailureReason = prepare.FailureReason;
+                return false;
+            }
+        }
 
         #region Helpers
 
@@ -173,6 +224,7 @@ namespace DiscordWPF.Abstractions
             {
                 Children = { new AdaptiveText() { Text = title, HintStyle = AdaptiveTextStyle.Title }, new AdaptiveText() { Text = messageText } }
             };
+
             var animated = message.Author.AvatarHash?.StartsWith("a_") ?? false;
             var url = animated ? message.Author.GetAvatarUrl(ImageFormat.Gif, 128) : message.Author.GetAvatarUrl(ImageFormat.Png, 128);
             if (url != null)
@@ -183,7 +235,7 @@ namespace DiscordWPF.Abstractions
             var attach = message.Attachments.FirstOrDefault(a => a.Height != 0);
             if (attach != null)
             {
-                toastBinding.HeroImage = new ToastGenericHeroImage { Source = await Shared.GetImagePathAsync(new Uri(attach.ProxyUrl)) };
+                toastBinding.HeroImage = new ToastGenericHeroImage { Source = await Shared.GetImagePathAsync(new Uri(attach.ProxyUrl + "?format=jpeg")) };
             }
             else
             {
@@ -192,12 +244,14 @@ namespace DiscordWPF.Abstractions
                     toastBinding.HeroImage = new ToastGenericHeroImage { Source = await Shared.GetImagePathAsync(embed.Thumbnail?.ProxyUrl ?? embed.Image?.ProxyUrl) };
             }
 
+#if DEBUG
             var replyString = message.Channel is DiscordDmChannel ? $"Reply to @{message.Author.Username}..." : $"Message #{message.Channel.Name}...";
             actions = new ToastActionsCustom()
             {
                 Inputs = { new ToastTextBox("tbReply") { PlaceholderContent = replyString } },
                 Buttons = { new ToastButton("Reply", "") { ActivationType = ToastActivationType.Background, TextBoxId = "tbReply" } }
             };
+#endif
 
             var visual = new ToastVisual() { BindingGeneric = toastBinding };
 
@@ -205,7 +259,9 @@ namespace DiscordWPF.Abstractions
             {
                 DisplayTimestamp = message.Timestamp.DateTime,
                 Visual = visual,
+#if DEBUG
                 Actions = actions
+#endif
             };
 
             var str = toastContent.GetContent();
@@ -217,7 +273,8 @@ namespace DiscordWPF.Abstractions
             _sentNotifications[message.Id] = notif;
 
             return notif;
-        }        
+        }
+
         #endregion
     }
 }

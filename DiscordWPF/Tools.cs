@@ -15,7 +15,9 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -110,6 +112,13 @@ namespace DiscordWPF
             {
                 yield return locations.Skip(i).Take(Math.Min(size, count - i));
             }
+        }
+        
+        internal static void EncodeToPng(BitmapSource bitmap, MemoryStream stream)
+        {
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bitmap));
+            encoder.Save(stream);
         }
 
         internal static bool WillShowToast(DiscordMessage message)
@@ -285,6 +294,11 @@ namespace DiscordWPF
                     window.Show();
                 }
             }
+        }
+
+        public static Task SendFileWithProgressAsync(this DiscordChannel channel, string message, Stream file, string fileName, IProgress<double?> progress)
+        {
+            return App.Abstractions.SendFileWithProgressAsync(channel, message, file, fileName, progress);
         }
 
         private static void SetupWindow(ChannelPage page, Frame f, Point p, ChannelWindow window)
@@ -471,9 +485,9 @@ namespace DiscordWPF
 
         private void MentionRun_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if(sender is Run run && run.Tag is MentionInline obj)
+            if (sender is Run run && run.Tag is MentionInline obj)
             {
-                
+
             }
         }
 

@@ -61,6 +61,10 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.WindowsRuntime, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\Windows\Microsoft.NET\Framework\v4.0.30319\System.Runtime.WindowsRuntime.dll</HintPath>
+    </Reference>
     <Reference Include="System.Security" />
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
@@ -69,15 +73,8 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xaml" />
-    <Reference Include="Windows.Security" />
-    <Reference Include="Windows.ApplicationModel">
-      <HintPath>..\..\..\..\..\..\WINDOWS\System32\WinMetadata\Windows.ApplicationModel.winmd</HintPath>
-    </Reference>
-    <Reference Include="Windows.Data">
-      <HintPath>..\..\..\..\..\..\WINDOWS\System32\WinMetadata\Windows.Data.winmd</HintPath>
-    </Reference>
-    <Reference Include="Windows.UI">
-      <HintPath>..\..\..\..\..\..\WINDOWS\System32\WinMetadata\Windows.UI.winmd</HintPath>
+    <Reference Include="Windows">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Windows Kits\10\UnionMetadata\10.0.16299.0\Windows.winmd</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
@@ -103,6 +100,9 @@
     <Compile Include="Converters\ChannelIconConverter.cs" />
     <Compile Include="Converters\VoiceConverters.cs" />
     <Compile Include="Converters\WindowTitleConverter.cs" />
+    <Compile Include="Dialogs\UploadFileDialog.xaml.cs">
+      <DependentUpon>UploadFileDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Effects\NoiseEffect.cs" />
     <Compile Include="Net\Update.cs" />
     <Compile Include="Pages\ChannelPage.xaml.cs">
@@ -125,6 +125,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\MessageViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Dialogs\UploadFileDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -264,6 +268,9 @@
     <PackageReference Include="System.Net.Http">
       <Version>4.3.3</Version>
     </PackageReference>
+    <PackageReference Include="Windows7APICodePack-Shell">
+      <Version>1.1.0</Version>
+    </PackageReference>
     <PackageReference Include="XamlAnimatedGif">
       <Version>1.1.10</Version>
     </PackageReference>
@@ -283,6 +290,8 @@
     <None Include="Assets\WinformsMask.png" />
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Assets\AudioFile.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

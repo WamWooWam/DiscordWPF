@@ -96,6 +96,14 @@ namespace DiscordWPF.Abstractions
             }
         }
 
+        public void RetractNotification(ulong id) { /* not possible in win32 */ }
+
+        public Task SendFileWithProgressAsync(DiscordChannel channel, string message, Stream file, string fileName, IProgress<double?> progress)
+        {
+            progress.Report(null);
+            return channel.SendFileAsync(file, fileName, message, false);
+        }
+
         private void EnsureWinProc()
         {
             if (_source == null)
@@ -192,6 +200,5 @@ namespace DiscordWPF.Abstractions
             _icon.Dispose();
         }
 
-        public void RetractNotification(ulong id) { /* not possible in win32 */ }
     }
 }
