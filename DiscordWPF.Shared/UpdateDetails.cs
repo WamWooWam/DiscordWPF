@@ -6,16 +6,29 @@ namespace DiscordWPF.Shared
 {
     public class UpdateDetails
     {
-        [JsonProperty("new_version")]
-        public string NewVersion { get; set; }
+        [JsonProperty("version")]
+        internal string _version;
 
-        [JsonProperty("new_version_details")]
-        public string NewVersionDetails { get; set; }
+        [JsonIgnore]
+        public Version Version
+        {
+            get => Version.Parse(_version);
+            set => _version = value.ToString();
+        }
+
+        [JsonProperty("version_details")]
+        public string VersionDetails { get; set; }
+
+        [JsonProperty("main_exe")]
+        public string MainExecutable { get; set; }
+
+        [JsonProperty("platform")]
+        public string Platform { get; set; }
 
         [JsonProperty("released_at")]
         public DateTimeOffset ReleaseDate { get; set; }
 
         [JsonProperty("files")]
-        public Dictionary<string, byte[]> Files { get; set; }
+        public List<UpdateFile> Files { get; set; }
     }
 }

@@ -19,6 +19,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using WamWooWam.Wpf;
 
 namespace DiscordWPF
@@ -31,28 +32,29 @@ namespace DiscordWPF
         public MainWindow()
         {
             InitializeComponent();
+            Width = Math.Min(SystemParameters.PrimaryScreenWidth - 40, Width);
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             ShowConnectingOverlay();
 
-            await ChangeStatus("Checking for Updates...");
-
-            var update = await Update.CheckForUpdates();
-            if (update?.UpdateAvailable == true)
+            await loadingControl.ChangeStatusAsync("Checking for Updates...");
+            
+            if (await Update.CheckForUpdates())
             {
-                await Update.RunUpdateAsync(update.Details, ChangeStatus);
+                await loadingControl.ChangeStatusAsync("Preparing to install...");
+                await Update.RunUpdateAsync();
                 return;
             }
 
-            await ChangeStatus("Initialising...");
-            await Dispatcher.InvokeAsync(() => App.InitialiseCEF());
+            await loadingControl.ChangeStatusAsync("Initialising...");
+            await Dispatcher.InvokeAsync(() => App.InitialiseCEF(), DispatcherPriority.Loaded);
 
             var token = App.Abstractions.GetToken("Default");
             if (!string.IsNullOrWhiteSpace(token))
             {
-                await ChangeStatus("Connecting to Discord...");
+                await loadingControl.ChangeStatusAsync("Connecting to Discord...");
                 await App.LoginAsync(token, OnReady, OnError);
             }
             else
@@ -61,27 +63,9 @@ namespace DiscordWPF
             }
         }
 
-        internal async Task ChangeStatus(string text, int? value = null, int? max = null)
-        {
-            await Dispatcher.InvokeAsync(() =>
-            {
-                connectingStatus.Text = text;
-                connetingProgress.Maximum = max ?? connetingProgress.Maximum;
-                if (value == null)
-                {
-                    connetingProgress.IsIndeterminate = true;
-                }
-                else
-                {
-                    connetingProgress.IsIndeterminate = false;
-                    connetingProgress.Value = value.Value;
-                }
-            });
-        }
-
         private async Task OnReady(ReadyEventArgs e)
         {
-            await ChangeStatus("Ready!");
+            await loadingControl.ChangeStatusAsync("Ready!");
             await Dispatcher.InvokeAsync(() => rootFrame.Navigate(new Uri("pack://application:,,,/Pages/DiscordPage.xaml")));
         }
 
@@ -101,7 +85,6 @@ namespace DiscordWPF
         internal void ShowConnectingOverlay()
         {
             connectingOverlay.Visibility = Visibility.Visible;
-            connetingProgress.IsIndeterminate = true;
             (Resources["showConnecting"] as Storyboard).Begin();
         }
 
@@ -113,7 +96,6 @@ namespace DiscordWPF
         private void hideConnecting_Completed(object sender, EventArgs e)
         {
             connectingOverlay.Visibility = Visibility.Hidden;
-            connetingProgress.IsIndeterminate = false;
         }
 
         private void rootFrame_Navigating(object sender, NavigatingCancelEventArgs e)

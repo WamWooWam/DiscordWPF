@@ -24,6 +24,7 @@ using static DiscordWPF.Constants;
 using DiscordWPF.Controls;
 using DiscordWPF.Pages.Placeholder;
 using System.Windows.Navigation;
+using WamWooWam.Wpf.Interop;
 
 namespace DiscordWPF.Windows
 {

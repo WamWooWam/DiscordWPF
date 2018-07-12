@@ -57,9 +57,9 @@ namespace DiscordWPF.Pages
                     try
                     {
                         var update = await Update.GetUpdateDetailsAsync(version);
-                        if (update != null && !string.IsNullOrWhiteSpace(update.NewVersionDetails))
+                        if (update != null && !string.IsNullOrWhiteSpace(update.VersionDetails))
                         {
-                            updateDoc.Document = Markdown.ToFlowDocument(update.NewVersionDetails, new Markdig.MarkdownPipelineBuilder().UseSupportedExtensions().Build());
+                            updateDoc.Document = Markdown.ToFlowDocument(update.VersionDetails, new Markdig.MarkdownPipelineBuilder().UseSupportedExtensions().Build());
                             updateOverlay.Visibility = Visibility.Visible;
                         }
                     }

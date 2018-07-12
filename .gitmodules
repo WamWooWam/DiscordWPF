@@ -7,3 +7,6 @@
 [submodule "WamWooWam.Core"]
 	path = WamWooWam.Core
 	url = https://github.com/WamWooWam/WamWooWam.Core
+[submodule "jsonite"]
+	path = jsonite
+	url = https://github.com/xoofx/jsonite

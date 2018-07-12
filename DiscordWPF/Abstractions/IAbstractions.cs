@@ -13,7 +13,9 @@ namespace DiscordWPF.Abstractions
 
         void SetToken(string key, string token);
 
-        void ShowNotification(DiscordMessage message);
+        Task ShowNotificationAsync(DiscordMessage message);
+
+        void RetractNotification(ulong id);
 
         void ShowInfoNotification(string title, string content);
     }

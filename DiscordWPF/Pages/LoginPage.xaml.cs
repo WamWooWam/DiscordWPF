@@ -39,7 +39,7 @@ namespace DiscordWPF.Pages
             if (!string.IsNullOrWhiteSpace(password))
             {
                 var window = this.FindVisualParent<MainWindow>();
-                window.connectingStatus.Text = "Connecting to Discord...";
+                await window.loadingControl.ChangeStatusAsync("Connecting to Discord...");
                 window.ShowConnectingOverlay();
 
                 await App.LoginAsync(password, OnReady, OnError);
@@ -129,7 +129,7 @@ namespace DiscordWPF.Pages
                             (Resources["hideDiscord"] as Storyboard).Begin();
 
                             var window = this.FindVisualParent<MainWindow>();
-                            window.connectingStatus.Text = "Connecting to Discord...";
+                            window.loadingControl.ChangeStatus("Connecting to Discord...");
                             window.ShowConnectingOverlay();
                         });
                         await App.LoginAsync(t, OnReady, OnError);

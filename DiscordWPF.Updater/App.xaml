@@ -1,0 +1,20 @@
+﻿<Application x:Class="DiscordWPF.Updater.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:DiscordWPF.Updater"
+             Startup="Application_Startup"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source=".\Themes\ProgressBars.xaml"/>
+                <ResourceDictionary Source=".\Themes\Text.xaml"/>
+                <ResourceDictionary Source=".\Themes\Windows.xaml"/>
+                <ResourceDictionary Source=".\Themes\TextBoxes.xaml"/>
+                <ResourceDictionary Source=".\Themes\Buttons.xaml"/>
+                <ResourceDictionary Source=".\Themes\ComboBoxes.xaml"/>
+                <ResourceDictionary Source=".\Themes\SharedResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

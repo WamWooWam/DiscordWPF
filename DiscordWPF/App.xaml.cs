@@ -40,7 +40,7 @@ namespace DiscordWPF
 
         internal static DiscordClient Discord { get; private set; }
 
-        internal static IAbstractions Abstractions { get; private set; } = new Win32Abstractions();
+        internal static IAbstractions Abstractions { get; private set; }
 
         internal static TelemetryClient Telemetry { get; private set; }
 
@@ -67,21 +67,11 @@ namespace DiscordWPF
 
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 
-            var farg = e.Args.FirstOrDefault();
-            if (farg == "do-update" && e.Args.Length == 3)
-            {
-                Update.DoUpdate(e.Args);
-                Environment.Exit(0);
-            }
-
-            if (farg == "finish-update" && e.Args.Length == 2)
-            {
-                Update.FinishUpdate(e.Args[1]);
-            }
-
             Telemetry.TrackEvent("Launch");
 
             InitialiseThemes();
+
+            Abstractions = Misc.IsWindows7 ? (IAbstractions)new Win32Abstractions() : new UwpAbstractions();
         }
 
         internal static void InitialiseCEF()
@@ -105,7 +95,7 @@ namespace DiscordWPF
             bool? light = Settings.GetSetting<bool?>(USE_LIGHT_THEME, null);
             Color? accent = Settings.GetSetting<Color?>(CUSTOM_ACCENT_COLOUR, null);
 
-            if (Settings.GetSetting(USE_DISCORD_ACCENT_COLOUR, Misc.IsWindows7))
+            if (Settings.GetSetting(USE_DISCORD_ACCENT_COLOUR, accent != null && Misc.IsWindows7))
             {
                 accent = Color.FromArgb(0xFF, 0x72, 0x89, 0xDA);
             }
@@ -138,11 +128,6 @@ namespace DiscordWPF
             {
                 d.Dispose();
             }
-        }
-
-        private void OnActivated(string arg1, Dictionary<string, string> arg2)
-        {
-
         }
 
         internal static async Task LoginAsync(string token, AsyncEventHandler<ReadyEventArgs> onReady, Func<Exception, Task> onError)
@@ -205,7 +190,7 @@ namespace DiscordWPF
         {
             if (Tools.WillShowToast(e.Message))
             {
-                Abstractions.ShowNotification(e.Message);
+                return Abstractions.ShowNotificationAsync(e.Message);
             }
 
             return Task.CompletedTask;

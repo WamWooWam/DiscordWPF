@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -90,16 +91,17 @@ namespace DiscordWPF
 
     internal static class Tools
     {
-        [DllImport("User32")]
+        [DllImport("user32.dll")]
         private static extern IntPtr GetTopWindow(IntPtr hWnd);
+
         [DllImport("user32.dll")]
         private static extern IntPtr GetWindow(IntPtr hWnd, GetWindow_Cmd uCmd);
 
-        [DllImport("shcore.dll")]
-        public static extern uint GetDpiForMonitor(IntPtr hMonitor, uint dpiType, out uint dpiX, out uint dpiY);
-
         [DllImport("user32.dll")]
         public static extern IntPtr MonitorFromPoint(System.Drawing.Point pt, uint dwFlags);
+
+        [DllImport("shcore.dll")]
+        public static extern uint GetDpiForMonitor(IntPtr hMonitor, uint dpiType, out uint dpiX, out uint dpiY);
 
         public static IEnumerable<IEnumerable<T>> Split<T>(this IEnumerable<T> locations, int size = 30)
         {
@@ -429,7 +431,8 @@ namespace DiscordWPF
         {
             if (obj.Type != MentionType.Emote)
             {
-                Run mentionRun = new Run() { FontWeight = FontWeights.Bold };
+                var mentionRun = new Run() { FontWeight = FontWeights.Bold, Tag = obj };
+                //mentionRun.AddHandler(ContentElement.MouseUpEvent, new Action<object, MouseButtonEventArgs>(MentionRun_MouseUp));
                 switch (obj.Type)
                 {
                     case MentionType.User:
@@ -450,9 +453,9 @@ namespace DiscordWPF
             else
             {
                 var uri = $"https://cdn.discordapp.com/emojis/{obj.Id}?size=32";
-                InlineUIContainer cont = new InlineUIContainer() { BaselineAlignment = BaselineAlignment.Center };
-                Image image = new Image() { Width = 24, Height = 24 };
-                if(obj.Value.StartsWith("<a:"))
+                var cont = new InlineUIContainer() { BaselineAlignment = BaselineAlignment.Center };
+                var image = new Image() { Width = 24, Height = 24 };
+                if (obj.Value.StartsWith("<a:"))
                 {
                     AnimationBehavior.SetSourceUri(image, new Uri(uri));
                 }
@@ -463,6 +466,14 @@ namespace DiscordWPF
 
                 cont.Child = image;
                 _writeInline?.Invoke(renderer, new[] { cont });
+            }
+        }
+
+        private void MentionRun_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if(sender is Run run && run.Tag is MentionInline obj)
+            {
+                
             }
         }
 

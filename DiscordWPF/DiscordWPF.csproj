@@ -9,57 +9,52 @@
     <RootNamespace>DiscordWPF</RootNamespace>
     <AssemblyName>DiscordWPF</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetPlatformVersion>8.0</TargetPlatformVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-  </PropertyGroup>
-  <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
-    <Prefer32Bit>false</Prefer32Bit>
-    <LangVersion>latest</LangVersion>
+    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x64\Debug\</OutputPath>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>latest</LangVersion>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x86\Debug\</OutputPath>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <PlatformTarget>x86</PlatformTarget>
-    <LangVersion>latest</LangVersion>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <OutputPath>bin\Release\</OutputPath>
     <Optimize>true</Optimize>
     <DefineConstants>TRACE</DefineConstants>
-    <LangVersion>latest</LangVersion>
+    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
     <PlatformTarget>x64</PlatformTarget>
     <Optimize>true</Optimize>
     <DefineConstants>TRACE</DefineConstants>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\x86\Release\</OutputPath>
     <PlatformTarget>x86</PlatformTarget>
     <Optimize>true</Optimize>
     <DefineConstants>TRACE</DefineConstants>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="PresentationUI, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
@@ -73,53 +68,34 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Xaml">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    <Reference Include="System.Xaml" />
+    <Reference Include="Windows.Security" />
+    <Reference Include="Windows.ApplicationModel">
+      <HintPath>..\..\..\..\..\..\WINDOWS\System32\WinMetadata\Windows.ApplicationModel.winmd</HintPath>
+    </Reference>
+    <Reference Include="Windows.Data">
+      <HintPath>..\..\..\..\..\..\WINDOWS\System32\WinMetadata\Windows.Data.winmd</HintPath>
+    </Reference>
+    <Reference Include="Windows.UI">
+      <HintPath>..\..\..\..\..\..\WINDOWS\System32\WinMetadata\Windows.UI.winmd</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
-  <ItemGroup Condition="'$(Configuration)' == 'Win10-Debug' Or '$(Configuration)' == 'Win10-Release'">
-    <Reference Include="System.Runtime.WindowsRuntime, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETCore\v4.5\System.Runtime.WindowsRuntime.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Windows">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Windows Kits\10\UnionMetadata\10.0.16299.0\Windows.winmd</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System.Runtime.InteropServices.WindowsRuntime" />
-    <Reference Include="System.Runtime.WindowsRuntime.UI.Xaml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETCore\v4.5\System.Runtime.WindowsRuntime.UI.Xaml.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Windows.Foundation.FoundationContract">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Windows Kits\10\References\10.0.16299.0\Windows.Foundation.FoundationContract\3.0.0.0\Windows.Foundation.FoundationContract.winmd</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <PackageReference Include="DesktopBridge.Helpers">
-      <Version>1.1.0</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications">
-      <Version>3.0.0</Version>
-    </PackageReference>
-  </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Abstractions\DesktopNotificationManagerCompat.cs" />
-    <Compile Include="Abstractions\UWPNotificationActivator.cs" />
-    <Compile Include="Constants.cs" />
+    <Compile Include="Abstractions\Misc\DesktopNotificationManagerCompat.cs" />
+    <Compile Include="Abstractions\Misc\UWPNotificationActivator.cs" />
+    <Compile Include="Abstractions\Shared.cs" />
     <Compile Include="Controls\DiscordFrame.cs" />
+    <Compile Include="Controls\LoadingControl.xaml.cs">
+      <DependentUpon>LoadingControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\MessageViewer.xaml.cs">
       <DependentUpon>MessageViewer.xaml</DependentUpon>
     </Compile>
@@ -145,6 +121,9 @@
     <Compile Include="Windows\GuildWindow.xaml.cs">
       <DependentUpon>GuildWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="Controls\LoadingControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\MessageViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -193,6 +172,9 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Themes\SharedResources.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\ChannelWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -213,7 +195,9 @@
     <Compile Include="Pages\LoginPage.xaml.cs">
       <DependentUpon>LoginPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Pages\Sidebar\MainPage.xaml.cs" />
+    <Compile Include="Pages\Sidebar\MainPage.xaml.cs">
+      <DependentUpon>Pages\Sidebar\MainPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -247,16 +231,22 @@
     <Resource Include="Shaders\Saturation.ps" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\DiscordWPF.Shared\DiscordWPF.Shared.csproj">
       <Project>{B88B73CF-F52A-4B5F-99CC-DA079D4DE547}</Project>
       <Name>DiscordWPF.Shared</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Assets\TrayIcon.ico" />
+    <ProjectReference Include="..\DSharpPlus\DSharpPlus.WPF\DSharpPlus.WPF.csproj">
+      <Project>{6ec44fc0-3293-43f3-bac3-a316640b5d3a}</Project>
+      <Name>DSharpPlus.WPF</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WamWooWam.Core\WamWooWam.Core\WamWooWam.Core.csproj">
+      <Project>{50613c0d-5a00-4224-9e35-53694f5e862b}</Project>
+      <Name>WamWooWam.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WamWooWam.Wpf\WamWooWam.Wpf\WamWooWam.Wpf.csproj">
+      <Project>{1e367189-add4-4299-9a2d-08cc4dcaa039}</Project>
+      <Name>WamWooWam.Wpf</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CefSharp.Wpf">
@@ -268,12 +258,6 @@
     <PackageReference Include="Microsoft.ApplicationInsights">
       <Version>2.6.4</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.AspNet.WebApi.Client">
-      <Version>5.2.6</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Toolkit.Win32.UI.Controls">
-      <Version>3.0.0</Version>
-    </PackageReference>
     <PackageReference Include="Ookii.Dialogs">
       <Version>1.0.0</Version>
     </PackageReference>
@@ -283,9 +267,22 @@
     <PackageReference Include="XamlAnimatedGif">
       <Version>1.1.10</Version>
     </PackageReference>
+    <PackageReference Include="DesktopBridge.Helpers">
+      <Version>1.1.0</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications">
+      <Version>3.0.0</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Assets\TrayIcon.ico" />
     <Resource Include="Assets\Noise.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="LICENCES.txt" />
+    <None Include="Assets\WinformsMask.png" />
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
