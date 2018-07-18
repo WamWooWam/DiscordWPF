@@ -1,14 +1,15 @@
 ﻿using DiscordWPF.Controls;
+using DiscordWPF.Dialogs;
 using DiscordWPF.Windows;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using Microsoft.WindowsAPICodePack.Shell;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -18,17 +19,10 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.IO;
 using System.Windows.Threading;
 using WamWooWam.Core;
 using WamWooWam.Wpf;
-
 using static DiscordWPF.Constants;
-using DiscordWPF.Dialogs;
-using Microsoft.WindowsAPICodePack.Shell;
-using Microsoft.WindowsAPICodePack.Shell.PropertySystem;
-using DiscordWPF.Abstractions;
 
 namespace DiscordWPF.Pages
 {
@@ -177,6 +171,11 @@ namespace DiscordWPF.Pages
             App.Discord.MessageCreated += Discord_MessageCreated;
             App.Discord.MessageDeleted += Discord_MessageDeleted;
 
+            lock (App.VisibleChannels)
+            {
+                App.VisibleChannels.Add(Channel.Id);
+            }
+
             foreach (var item in messagesPanel.Children.OfType<MessageViewer>())
             {
                 item.MiniMode = false;
@@ -232,6 +231,12 @@ namespace DiscordWPF.Pages
         private void Page_Unloaded(object sender, RoutedEventArgs e)
         {
             App.Discord.MessageCreated -= Discord_MessageCreated;
+            App.Discord.MessageDeleted -= Discord_MessageDeleted;
+
+            lock (App.VisibleChannels)
+            {
+                App.VisibleChannels.Remove(Channel.Id);
+            }
         }
 
         private async Task Discord_MessageCreated(MessageCreateEventArgs e)
@@ -283,7 +288,24 @@ namespace DiscordWPF.Pages
             if (e.Key == Key.Return && !Keyboard.IsKeyDown(Key.LeftShift))
             {
                 e.Handled = true;
-                await SendMessageAsync();
+                try
+                {
+                    await SendMessageAsync();
+                }
+                catch (Exception ex)
+                {
+                    App.ShowErrorDialog("Message failed to send!", "Message failed to send!", "Something went *super* wrong sending your message, maybe wait a sec and try again?");
+                }
+            }
+
+            if (e.Key == Key.Up && string.IsNullOrWhiteSpace(messageTextBox.Text))
+            {
+                e.Handled = true;
+                var viewer = messagesPanel.Children.OfType<MessageViewer>().LastOrDefault(v => v.Message.Author == App.Discord.CurrentUser);
+                if (viewer != null)
+                {
+                    viewer.BeginEdit();
+                }
             }
         }
 
@@ -338,23 +360,25 @@ namespace DiscordWPF.Pages
         /// </summary>
         private async void messageTextBox_OnPaste(object sender, RoutedEventArgs e)
         {
-            if (e is ExecutedRoutedEventArgs executed && executed.Command == ApplicationCommands.Paste)
+            if (Channel is DiscordDmChannel || Channel.Guild.CurrentMember.PermissionsIn(Channel).HasPermission(Permissions.AttachFiles))
             {
-                var data = Clipboard.GetDataObject();
-                if (data.GetDataPresent(DataFormats.Bitmap) && data.GetData(DataFormats.Bitmap) is BitmapSource bitmap)
+                if (e is ExecutedRoutedEventArgs executed && executed.Command == ApplicationCommands.Paste)
                 {
-                    executed.Handled = true;
-                    await UploadFromImageSourceAsync(bitmap);
-                }
-                else if (data.GetDataPresent(DataFormats.FileDrop) && data.GetData(DataFormats.FileDrop) is string[] files)
-                {
-                    executed.Handled = true;
-                    foreach (var file in files)
+                    var data = Clipboard.GetDataObject();
+                    if (data.GetDataPresent(DataFormats.Bitmap) && data.GetData(DataFormats.Bitmap) is BitmapSource bitmap)
                     {
-                        await UploadFromFileAsync(file);
+                        executed.Handled = true;
+                        await UploadFromImageSourceAsync(bitmap);
+                    }
+                    else if (data.GetDataPresent(DataFormats.FileDrop) && data.GetData(DataFormats.FileDrop) is string[] files)
+                    {
+                        executed.Handled = true;
+                        foreach (var file in files)
+                        {
+                            await UploadFromFileAsync(file);
+                        }
                     }
                 }
-
             }
         }
 
@@ -364,7 +388,7 @@ namespace DiscordWPF.Pages
         /// <param name="caption">The caption for the attachment.</param>
         /// <param name="filename">The attachment file name. Doesn't need to be a real file name.</param>
         /// <param name="stream">The stream with the file to upload</param>
-        private async Task UploadStreamAsync(string caption, string filename, Stream stream)
+        private async Task UploadStreamAsync(string caption, string filename, Stream stream, double offset = 0d, double percent = 1)
         {
             uploadProgress.IsIndeterminate = true;
             uploadProgress.Visibility = Visibility.Visible;
@@ -374,7 +398,7 @@ namespace DiscordWPF.Pages
                 if (d.HasValue)
                 {
                     uploadProgress.IsIndeterminate = false;
-                    uploadProgress.Value = d.Value;
+                    uploadProgress.Value = (d.Value * percent) + offset;
                 }
                 else if (!uploadProgress.IsIndeterminate)
                 {
@@ -400,23 +424,32 @@ namespace DiscordWPF.Pages
                     using (var shell = ShellFile.FromFilePath(file))
                     {
                         var size = new FileInfo(file).Length;
-                        if (size < (App.Discord.CurrentUser.HasNitro ? 50 * 1024 * 1024 : 8 * 1024 * 1024))
+                        var dialog = new UploadFileDialog(shell.Thumbnail.LargeBitmapSource, shell.GetDisplayName(DisplayNameType.Default)) { Owner = Window.GetWindow(this) };
+                        if (dialog.ShowDialog() == true)
                         {
-                            var dialog = new UploadFileDialog(shell.Thumbnail.LargeBitmapSource, shell.GetDisplayName(DisplayNameType.Default)) { Owner = Window.GetWindow(this) };
-                            if (dialog.ShowDialog() == true)
+                            // TODO: handle weird types.
+                            if ((size > (App.Discord.CurrentUser.HasNitro ? 50 * 1024 * 1024 : 8 * 1024 * 1024) || false) && Settings.GetSetting("AutoTranscodeMedia", true))
                             {
-                                using (var stream = File.OpenRead(file))
+                                var temp = Path.GetTempFileName();
+
+                                using (var stream = File.Create(temp))
                                 {
-                                    await UploadStreamAsync(dialog.Caption, Path.GetFileName(file), stream);
+                                    if (await TranscodeToStreamAsync(file, stream))
+                                    {
+                                        await CheckAndSendStreamAsync(stream, dialog.Caption, file, true);
+                                    }
+                                    else
+                                    {
+                                        using (var fileStr = File.OpenRead(file))
+                                            await CheckAndSendStreamAsync(fileStr, dialog.Caption, file);
+                                    }
                                 }
                             }
-                        }
-                        else
-                        {
-                            App.ShowErrorDialog(
-                                "Unable to send file!",
-                                "File too large!",
-                                $"Sorry! That file's too large. I'll need something under {Files.SizeSuffix(App.Discord.CurrentUser.HasNitro ? 50 * 1024 * 1024 : 8 * 1024 * 1024)} please!");
+                            else
+                            {
+                                using (var stream = File.OpenRead(file))
+                                    await CheckAndSendStreamAsync(stream, dialog.Caption, file);
+                            }
                         }
                     }
                 }
@@ -428,6 +461,60 @@ namespace DiscordWPF.Pages
                     "Unable to send file!",
                     "An error occured sending a file!",
                     $"Sorry! Something went wrong uploading that file! Please wait a few seconds and try again.");
+
+                uploadProgress.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private async Task<bool> TranscodeToStreamAsync(string file, Stream stream)
+        {
+            uploadProgress.IsIndeterminate = true;
+            uploadProgress.Visibility = Visibility.Visible;
+
+            var mime = await App.Abstractions.GetFileMimeAsync(file);
+
+            var progress = new Progress<double?>(d =>
+            {
+                if (d.HasValue)
+                {
+                    uploadProgress.IsIndeterminate = false;
+                    uploadProgress.Value = (d.Value * 0.5);
+                }
+                else if (!uploadProgress.IsIndeterminate)
+                {
+                    uploadProgress.IsIndeterminate = true;
+                }
+            });
+
+            if (mime.StartsWith("audio"))
+            {
+                return await App.Abstractions.TryTranscodeAudioAsync(file, stream, progress);
+            }
+            else if (mime.StartsWith("video"))
+            {
+                return await App.Abstractions.TryTranscodeVideoAsync(file, stream, progress);
+            }
+            else if (mime.StartsWith("image") && mime != "image/gif")
+            {
+                return await App.Abstractions.TryTranscodeImageAsync(file, stream, progress);
+            }
+
+            return false;
+        }
+
+        private async Task CheckAndSendStreamAsync(Stream stream, string caption, string filename, bool half = false)
+        {
+            if (stream.Length < (App.Discord.CurrentUser.HasNitro ? 50 * 1024 * 1024 : 8 * 1024 * 1024))
+            {
+                await UploadStreamAsync(caption, Path.GetFileName(filename), stream, half ? 50 : 0, half ? 0.5 : 1);
+            }
+            else
+            {
+                uploadProgress.Visibility = Visibility.Collapsed;
+                App.ShowErrorDialog(
+                   "Unable to send file!",
+                   "File too large!",
+                   $"Sorry! That file's too large. I'll need something under {Files.SizeSuffix(App.Discord.CurrentUser.HasNitro ? 50 * 1024 * 1024 : 8 * 1024 * 1024, 0)} please!");
             }
         }
 
@@ -465,6 +552,8 @@ namespace DiscordWPF.Pages
                     "Unable to send image!",
                     "An error occured sending an image!",
                     $"Sorry! Something went wrong uploading that image! Please wait a few seconds and try again.");
+
+                uploadProgress.Visibility = Visibility.Collapsed;
             }
         }
 

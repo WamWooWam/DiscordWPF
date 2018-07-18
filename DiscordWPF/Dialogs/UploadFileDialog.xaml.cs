@@ -38,7 +38,7 @@ namespace DiscordWPF.Dialogs
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-
+            commentTextBox.Focus();
         }
 
         private void Cancel_Clicked(object sender, RoutedEventArgs e)
@@ -51,6 +51,16 @@ namespace DiscordWPF.Dialogs
         {
             DialogResult = true;
             Close();
+        }
+
+        private void commentTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Return && !Keyboard.IsKeyDown(Key.LeftShift))
+            {
+                e.Handled = true;
+                DialogResult = true;
+                Close();
+            }
         }
     }
 }

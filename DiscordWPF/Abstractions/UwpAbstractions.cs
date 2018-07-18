@@ -16,9 +16,15 @@ using WamWooWam.Core;
 using WamWooWam.Wpf;
 using Windows.Data.Xml.Dom;
 using Windows.Foundation;
+using Windows.Foundation.Collections;
+using Windows.Media;
+using Windows.Media.Capture;
+using Windows.Media.Core;
 using Windows.Media.MediaProperties;
 using Windows.Media.Transcoding;
 using Windows.Security.Credentials;
+using Windows.Storage;
+using Windows.Storage.Streams;
 using Windows.UI.Notifications;
 using Windows.Web.Http;
 
@@ -57,7 +63,7 @@ namespace DiscordWPF.Abstractions
 
         public void SetToken(string key, string token)
         {
-            if (token == null)
+            if (string.IsNullOrWhiteSpace(token))
             {
                 try
                 {
@@ -111,7 +117,7 @@ namespace DiscordWPF.Abstractions
                 _toastNotifier.Value.Hide(notif);
             }
         }
-        
+
         public async Task SendFileWithProgressAsync(DiscordChannel channel, string message, Stream file, string fileName, IProgress<double?> progress)
         {
             using (var client = new HttpClient())
@@ -120,11 +126,16 @@ namespace DiscordWPF.Abstractions
                     = new HttpRequestMessage(HttpMethod.Post, new Uri("https://discordapp.com/api/v7" + string.Format("/channels/{0}/messages", channel.Id)));
                 httpRequestMessage.Headers.Add("Authorization", Utilities.GetFormattedToken(channel.Discord));
 
-                httpRequestMessage.Content = new HttpMultipartFormDataContent
+                var cont = new HttpMultipartFormDataContent();
+
+                if (!string.IsNullOrWhiteSpace(message))
                 {
-                    { new HttpStringContent(message), "content" },
-                    { new HttpStreamContent(file.AsInputStream()), "file", fileName }
-                };
+                    cont.Add(new HttpStringContent(message), "content");
+                }
+
+                cont.Add(new HttpStreamContent(file.AsInputStream()), "file", fileName);
+
+                httpRequestMessage.Content = cont;
 
                 var send = client.SendRequestAsync(httpRequestMessage);
                 send.Progress += new AsyncOperationProgressHandler<HttpResponseMessage, HttpProgress>((o, e) =>
@@ -133,32 +144,80 @@ namespace DiscordWPF.Abstractions
                 });
 
                 await send;
-
             }
         }
 
-        internal static TranscodeFailureReason LastTranscodeFailureReason { get; private set; }
+        #region Media
 
-        internal async Task<bool> TryTranscodeAudioAsync(Stream inStream, MemoryStream outStream)
+        public async Task<string> GetFileMimeAsync(string path)
         {
-            var transcoder = new MediaTranscoder();
-            var prepare = await transcoder.PrepareStreamTranscodeAsync(
-                inStream.AsRandomAccessStream(),
-                outStream.AsRandomAccessStream(),
-                MediaEncodingProfile.CreateMp3(AudioEncodingQuality.High)
-                );
-
-            if (prepare.CanTranscode)
-            {
-                await prepare.TranscodeAsync();
-                return true;
-            }
-            else
-            {
-                LastTranscodeFailureReason = prepare.FailureReason;
-                return false;
-            }
+            var file = await StorageFile.GetFileFromPathAsync(path);
+            return file.ContentType;
         }
+
+        public async Task<bool> TryTranscodeAudioAsync(string file, Stream stream, IProgress<double?> progress)
+        {
+            try
+            {
+                var storageFile = await StorageFile.GetFileFromPathAsync(file);
+
+                return await TryTranscodeMediaAsync(storageFile, stream, MediaEncodingProfile.CreateMp3(AudioEncodingQuality.Medium), progress);
+            }
+            catch { }
+
+            return false;
+        }
+
+        public async Task<bool> TryTranscodeVideoAsync(string file, Stream stream, IProgress<double?> progress)
+        {
+            try
+            {
+                var storageFile = await StorageFile.GetFileFromPathAsync(file);
+                var props = await storageFile.Properties.GetVideoPropertiesAsync();
+                
+                var width = (int)props.Width;
+                var height = (int)props.Height;
+                Drawing.ScaleProportions(ref width, ref height, 854, 480);
+
+                var profile = MediaEncodingProfile.CreateMp4(VideoEncodingQuality.HD720p);
+
+                profile.Video.Width = (uint)(Math.Round(width / 2.0) * 2);
+                profile.Video.Height = (uint)(Math.Round(height / 2.0) * 2);
+                profile.Video.Bitrate = 1_500_000;
+
+                return await TryTranscodeMediaAsync(storageFile, stream, profile, progress);
+            }
+            catch { }
+
+            return false;
+        }
+
+        public Task<bool> TryTranscodeImageAsync(string file, Stream stream, IProgress<double?> progress)
+        {
+            return Task.FromResult(false);
+        }
+
+        private static async Task<bool> TryTranscodeMediaAsync(StorageFile file, Stream stream, MediaEncodingProfile profile, IProgress<double?> progress)
+        {
+            using (var fileStream = await file.OpenReadAsync())
+            {
+                var transcoder = new MediaTranscoder();
+                var prep = await transcoder.PrepareStreamTranscodeAsync(fileStream, stream.AsRandomAccessStream(), profile);
+
+                if (prep.CanTranscode)
+                {
+                    var task = prep.TranscodeAsync();
+                    task.Progress = new AsyncActionProgressHandler<double>((a, p) => progress.Report(p));
+                    await task;
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        #endregion
 
         #region Helpers
 

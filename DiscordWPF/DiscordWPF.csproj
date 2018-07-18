@@ -56,6 +56,9 @@
     <Optimize>true</Optimize>
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Assets\TrayIcon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="PresentationUI, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System" />
@@ -75,6 +78,7 @@
     <Reference Include="System.Xaml" />
     <Reference Include="Windows">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Windows Kits\10\UnionMetadata\10.0.16299.0\Windows.winmd</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
@@ -96,6 +100,7 @@
     <Compile Include="Controls\MessageViewer.xaml.cs">
       <DependentUpon>MessageViewer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\RangeSlider.cs" />
     <Compile Include="Converters\CategoryNameConverter.cs" />
     <Compile Include="Converters\ChannelIconConverter.cs" />
     <Compile Include="Converters\VoiceConverters.cs" />
@@ -120,6 +125,9 @@
     </Compile>
     <Compile Include="Windows\GuildWindow.xaml.cs">
       <DependentUpon>GuildWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\VideoTrimWindow.xaml.cs">
+      <DependentUpon>VideoTrimWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="Controls\LoadingControl.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -176,6 +184,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Themes\RangeSlider.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Themes\SharedResources.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -184,6 +196,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Windows\GuildWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\VideoTrimWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -268,8 +284,8 @@
     <PackageReference Include="System.Net.Http">
       <Version>4.3.3</Version>
     </PackageReference>
-    <PackageReference Include="Windows7APICodePack-Shell">
-      <Version>1.1.0</Version>
+    <PackageReference Include="WindowsAPICodePack-Shell">
+      <Version>1.1.1</Version>
     </PackageReference>
     <PackageReference Include="XamlAnimatedGif">
       <Version>1.1.10</Version>
@@ -292,6 +308,19 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Assets\AudioFile.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DiscordWPF.VisualElementsManifest.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\Logo150.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Logo70.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

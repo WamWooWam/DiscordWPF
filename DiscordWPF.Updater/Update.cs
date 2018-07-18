@@ -78,7 +78,7 @@ namespace DiscordWPF.Updater
                             catch (Exception ex)
                             {
                                 await window.Dispatcher.InvokeAsync(() => window.ShowError($"Failed to fetch {file["name"]}. {ex}"));
-                                break;
+                                return;
                             }
                         }
 

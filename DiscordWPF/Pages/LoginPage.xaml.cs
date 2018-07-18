@@ -42,7 +42,7 @@ namespace DiscordWPF.Pages
                 await window.loadingControl.ChangeStatusAsync("Connecting to Discord...");
                 window.ShowConnectingOverlay();
 
-                await App.LoginAsync(password, OnReady, OnError);
+                await App.LoginAsync(password, TokenLoginReady, OnError);
             }
             else
             {
@@ -50,9 +50,14 @@ namespace DiscordWPF.Pages
             }
         }
 
-        private async Task OnReady(ReadyEventArgs e)
+        private async Task TokenLoginReady(ReadyEventArgs e)
         {
             App.Abstractions.SetToken("Default", await Dispatcher.InvokeAsync(() => tokenTextBox.Password.Trim('"')));
+            await Dispatcher.InvokeAsync(() => NavigationService.Navigate(new DiscordPage()));
+        }
+
+        private async Task DiscordLoginReady(ReadyEventArgs e)
+        {
             await Dispatcher.InvokeAsync(() => NavigationService.Navigate(new DiscordPage()));
         }
 
@@ -132,12 +137,13 @@ namespace DiscordWPF.Pages
                             window.loadingControl.ChangeStatus("Connecting to Discord...");
                             window.ShowConnectingOverlay();
                         });
-                        await App.LoginAsync(t, OnReady, OnError);
+                        await App.LoginAsync(t, DiscordLoginReady, OnError);
                     }
                 }
             }
 
         }
+
 
         private async void browser_FrameLoadEnd(object sender, CefSharp.FrameLoadEndEventArgs e)
         {

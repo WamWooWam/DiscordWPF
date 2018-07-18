@@ -29,7 +29,7 @@ namespace DiscordWPF.Pages.Sidebar
     {
         private ObservableCollection<DiscordGuild> _guilds;
         private ObservableCollection<DiscordDmChannel> _dms;
-        private ObservableCollection<DiscordDmChannel> _groups;        
+        private ObservableCollection<DiscordDmChannel> _groups;
         private GuildChannelPage _guildChannelPage;
 
         public MainPage()
@@ -47,21 +47,26 @@ namespace DiscordWPF.Pages.Sidebar
             _dms = new ObservableCollection<DiscordDmChannel>(App.Discord.PrivateChannels.Where(c => c.Type == ChannelType.Private));
             _groups = new ObservableCollection<DiscordDmChannel>(App.Discord.PrivateChannels.Where(c => c.Type == ChannelType.Group));
 
+            var openChannel = (this.FindVisualParent<DiscordPage>().mainFrame.Content as ChannelPage)?.Channel;
+
             await Dispatcher.InvokeAsync(() =>
             {
                 guildsList.ItemsSource = _guilds;
+                guildsList.SelectedItem = null;
                 guildsList.SelectionChanged += OnSelectionChanged;
             }, DispatcherPriority.DataBind);
 
             await Dispatcher.InvokeAsync(() =>
             {
                 dmsSource.Source = _dms;
+                dmsList.SelectedItem = openChannel?.Type == ChannelType.Private ? openChannel : null;
                 dmsList.SelectionChanged += OnSelectionChanged;
             }, DispatcherPriority.DataBind);
 
             await Dispatcher.InvokeAsync(() =>
             {
                 groupsList.ItemsSource = _groups;
+                groupsList.SelectedItem = openChannel?.Type == ChannelType.Group ? openChannel : null;
                 groupsList.SelectionChanged += OnSelectionChanged;
             }, DispatcherPriority.DataBind);
 
@@ -79,6 +84,7 @@ namespace DiscordWPF.Pages.Sidebar
             var guild = e.AddedItems.OfType<DiscordGuild>().FirstOrDefault();
             if (guild != null)
             {
+                guildsList.SelectedItem = null;
                 _guildChannelPage.DataContext = guild;
                 this.FindVisualParent<Frame>().Navigate(_guildChannelPage);
             }
@@ -91,8 +97,6 @@ namespace DiscordWPF.Pages.Sidebar
                     Tools.NavigateToChannel(dm, page.Frame);
                 }
             }
-
-            (sender as ListView).SelectedItem = null;
         }
 
         private async Task Discord_GuildCreated(GuildCreateEventArgs e)

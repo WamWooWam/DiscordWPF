@@ -18,6 +18,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
@@ -37,6 +38,8 @@ namespace DiscordWPF
         private static int _connectionAttempts = 0;
         private static Guid _instanceId;
         private static bool _cleanShutdown;
+
+        internal static readonly List<ulong> VisibleChannels = new List<ulong>();
 
         internal static DiscordClient Discord { get; private set; }
 
@@ -66,12 +69,25 @@ namespace DiscordWPF
             ctx.User.Id = _instanceId.ToString();
 
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
+            AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
 
             Telemetry.TrackEvent("Launch");
 
             InitialiseThemes();
 
-            Abstractions = Misc.IsWindows7 ? (IAbstractions)new Win32Abstractions() : new UwpAbstractions();
+            if (Misc.IsWindows7)
+            {
+                Abstractions = new Win32Abstractions();
+            }
+            else
+            {
+                Abstractions = new UwpAbstractions();
+            }
+        }
+
+        private void CurrentDomain_FirstChanceException(object sender, FirstChanceExceptionEventArgs e)
+        {
+            Telemetry.TrackException(e.Exception);
         }
 
         internal static void InitialiseCEF()

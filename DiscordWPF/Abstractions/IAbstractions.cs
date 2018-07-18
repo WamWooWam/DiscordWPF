@@ -21,5 +21,10 @@ namespace DiscordWPF.Abstractions
         void ShowInfoNotification(string title, string content);
 
         Task SendFileWithProgressAsync(DiscordChannel channel, string message, Stream file, string fileName, IProgress<double?> progress);
+
+        Task<string> GetFileMimeAsync(string path);
+        Task<bool> TryTranscodeAudioAsync(string file, Stream stream, IProgress<double?> progress);
+        Task<bool> TryTranscodeImageAsync(string file, Stream stream, IProgress<double?> progress);
+        Task<bool> TryTranscodeVideoAsync(string file, Stream stream, IProgress<double?> progress);
     }
 }

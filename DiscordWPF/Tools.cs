@@ -113,7 +113,7 @@ namespace DiscordWPF
                 yield return locations.Skip(i).Take(Math.Min(size, count - i));
             }
         }
-        
+
         internal static void EncodeToPng(BitmapSource bitmap, MemoryStream stream)
         {
             var encoder = new PngBitmapEncoder();
@@ -133,6 +133,15 @@ namespace DiscordWPF
             if (message.Channel is DiscordDmChannel)
             {
                 willNotify = true;
+            }
+
+            lock (App.VisibleChannels)
+            {
+                var anyFocusedWindows = Application.Current.Dispatcher.Invoke(() => Application.Current.Windows.OfType<Window>().Any(w => w.IsFocused));
+                if (App.VisibleChannels.Contains(message.Channel.Id) && anyFocusedWindows)
+                {
+                    willNotify = false;
+                }
             }
 
             if (message.Channel.Guild != null)
@@ -298,6 +307,9 @@ namespace DiscordWPF
 
         public static Task SendFileWithProgressAsync(this DiscordChannel channel, string message, Stream file, string fileName, IProgress<double?> progress)
         {
+            if (file.CanSeek)
+                file.Seek(0, SeekOrigin.Begin);
+
             return App.Abstractions.SendFileWithProgressAsync(channel, message, file, fileName, progress);
         }
 

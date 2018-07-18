@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Application xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <VisualElements 
+        Description="A WPF Discord client!"
+        BackgroundColor="#7289DA"
+        ShowNameOnSquare150x150Logo="on"
+        Square150x150Logo="Assets\Logo150.png"
+        Square70x70Logo="Assets\Logo70.png"
+        ForegroundText="light"
+        ToastCapable="true"/>
+</Application>

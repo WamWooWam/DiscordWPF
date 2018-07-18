@@ -27,6 +27,7 @@
 
         <TextBlock x:Name="userName" Grid.Column="1" FontSize="14" Margin="10,0,10,2" Text="{Binding Author.Username}" FontWeight="Bold" Foreground="{Binding Author.ColorBrush, TargetNullValue={StaticResource SystemBaseHighBrush}, FallbackValue={StaticResource SystemBaseHighBrush}}"/>
 
-        <RichTextBox x:Name="flowDoc" Grid.Column="1" Grid.Row="1" Margin="5,0" IsDocumentEnabled="True" SpellCheck.IsEnabled="True" Style="{StaticResource MessageRichTextBox}"/>
+        <TextBox x:Name="messageEditText" Grid.Column="1" Grid.Row="1" Margin="5,0" Visibility="Collapsed" SpellCheck.IsEnabled="True" PreviewKeyDown="messageText_PreviewKeyDown" Style="{StaticResource MessageTextBoxStyle}"/>
+        <RichTextBox x:Name="messageText" Grid.Column="1" Grid.Row="1" Margin="5,0" IsDocumentEnabled="True" SpellCheck.IsEnabled="True" Style="{StaticResource MessageRichTextBox}"/>
     </Grid>
 </UserControl>

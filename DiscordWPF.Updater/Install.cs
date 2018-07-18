@@ -67,7 +67,7 @@ namespace DiscordWPF.Updater
                         catch (Exception ex)
                         {
                             await window.Dispatcher.InvokeAsync(() => window.ShowError($"Failed to fetch {file["name"]}. {ex.Message}"));
-                            break;
+                            return false;
                         }
                     }
 
@@ -97,10 +97,10 @@ namespace DiscordWPF.Updater
 
             return false;
         }
-        
+
         internal static void CreateStartShortcut(string installDir)
         {
-            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "DiscordWPF");
+            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "Programs");
             var shortcutPath = Path.Combine(path, "DiscordWPF.lnk");
             Directory.CreateDirectory(path);
 

@@ -8,8 +8,10 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Media;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Interop;
@@ -31,7 +33,7 @@ namespace DiscordWPF.Abstractions
             _userIconCache = new ConcurrentDictionary<ulong, Icon>();
             _icon = new TrayIcon
             {
-                Icon = Properties.Resources.TrayIcon,
+                Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location),
                 Enabled = true,
                 Guid = Guid.Parse(Constants.APP_USER_MODEL_TOAST_ACTIVATOR_CLSID),
                 UseLargeIcons = true,
@@ -102,6 +104,12 @@ namespace DiscordWPF.Abstractions
         {
             progress.Report(null);
             return channel.SendFileAsync(file, fileName, message, false);
+        }
+
+        public Task<string> GetFileMimeAsync(string path)
+        {
+            var ext = Path.GetFileName(path);
+            return Task.FromResult(MimeMapping.GetMimeMapping(path));
         }
 
         private void EnsureWinProc()
@@ -200,5 +208,9 @@ namespace DiscordWPF.Abstractions
             _icon.Dispose();
         }
 
+        // None of these are gonna work on Windows 7 because fuck you.
+        public Task<bool> TryTranscodeAudioAsync(string file, Stream stream, IProgress<double?> progress) => Task.FromResult(false);
+        public Task<bool> TryTranscodeImageAsync(string file, Stream stream, IProgress<double?> progress) => Task.FromResult(false);
+        public Task<bool> TryTranscodeVideoAsync(string file, Stream stream, IProgress<double?> progress) => Task.FromResult(false);
     }
 }

@@ -26,7 +26,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <TextBlock x:Name="titleTextBox" Margin="0,10" Style="{DynamicResource SubtitleTextBlockStyle}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Text="Uploading image.png"/>
-                <TextBox x:Name="commentTextBox" Grid.Row="1" AcceptsReturn="True" TextWrapping="Wrap">
+                <TextBox x:Name="commentTextBox" Grid.Row="1" AcceptsReturn="True" PreviewKeyDown="commentTextBox_PreviewKeyDown" TextWrapping="Wrap">
                     <wam:PlaceholderService.Placeholder>
                         <TextBlock Text="Add a comment (optional)" Margin="2" Foreground="{DynamicResource SystemBaseMediumHighBrush}"/>
                     </wam:PlaceholderService.Placeholder>

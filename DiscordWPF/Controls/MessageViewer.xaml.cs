@@ -38,6 +38,7 @@ namespace DiscordWPF.Controls
         public DiscordMessage Message { get => (DiscordMessage)GetValue(MessageProperty); set => SetValue(MessageProperty, value); }
 
         public bool MiniMode { get; internal set; }
+        public bool IsEditing { get; private set; }
 
         public MessageViewer()
         {
@@ -64,25 +65,11 @@ namespace DiscordWPF.Controls
                 }
 
                 viewer.DataContext = message;
-                viewer.flowDoc.Document = MWpf.Markdown.ToFlowDocument(message.Content, viewer._pipeline);
+                viewer.messageText.Document = MWpf.Markdown.ToFlowDocument(message.Content, viewer._pipeline);
                 viewer.userName.Text = (message.Author is DiscordMember m) ? m.DisplayName : message.Author.Username;
 
                 viewer._internalIsLoaded = false;
             }
-        }
-
-        private static MarkdownPipeline CreateMarkdownPipeline()
-        {
-            var builder = new MarkdownPipelineBuilder()
-                .UseSoftlineBreakAsHardlineBreak()
-                .UseAutoLinks()
-                .UseEmphasisExtras(EmphasisExtraOptions.Strikethrough)
-                .Use<DiscordMarkdownExtension>()
-                .DisableHtml();
-
-            builder.BlockParsers.RemoveAll(p => p is QuoteBlockParser);
-
-            return builder.Build();
         }
 
         private void Author_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -99,9 +86,9 @@ namespace DiscordWPF.Controls
 
         private void Message_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(Message.Content))
+            if (e.PropertyName == nameof(Message.Content) && !IsEditing)
             {
-                flowDoc.Document = MWpf.Markdown.ToFlowDocument(Message.Content, _pipeline);
+                messageText.Document = MWpf.Markdown.ToFlowDocument(Message.Content, _pipeline);
             }
         }
 
@@ -139,15 +126,37 @@ namespace DiscordWPF.Controls
             }
         }
 
-        private void SetDefaultThickness()
+        internal void BeginEdit()
         {
-            if (MiniMode)
+            if (!IsEditing)
             {
-                Margin = new Thickness(10, 10, 10, 0);
+                IsEditing = true;
+
+                messageText.Visibility = Visibility.Collapsed;
+                messageEditText.Visibility = Visibility.Visible;
+                messageEditText.Text = Message.Content;
+                messageEditText.CaretIndex = Message.Content.Length;
+                messageEditText.Focus();
             }
-            else
+        }
+
+        private async void messageText_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (IsEditing && e.Key == Key.Return && !Keyboard.IsKeyDown(Key.LeftShift))
             {
-                Margin = new Thickness(10, 20, 10, 0);
+                e.Handled = true;
+
+                var text = messageEditText.Text;
+
+                IsEditing = false;
+                messageText.Visibility = Visibility.Visible;
+                messageText.Document = MWpf.Markdown.ToFlowDocument(text, _pipeline);
+                messageEditText.Visibility = Visibility.Collapsed;
+
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    await Message.ModifyAsync(text);
+                }
             }
         }
 
@@ -172,5 +181,33 @@ namespace DiscordWPF.Controls
         {
             MessageBox.Show(e.Parameter.ToString());
         }
+
+        #region Helpers
+        private void SetDefaultThickness()
+        {
+            if (MiniMode)
+            {
+                Margin = new Thickness(10, 10, 10, 0);
+            }
+            else
+            {
+                Margin = new Thickness(10, 20, 10, 0);
+            }
+        }
+
+        private static MarkdownPipeline CreateMarkdownPipeline()
+        {
+            var builder = new MarkdownPipelineBuilder()
+                .UseSoftlineBreakAsHardlineBreak()
+                .UseAutoLinks()
+                .UseEmphasisExtras(EmphasisExtraOptions.Strikethrough)
+                .Use<DiscordMarkdownExtension>()
+                .DisableHtml();
+
+            builder.BlockParsers.RemoveAll(p => p is QuoteBlockParser);
+
+            return builder.Build();
+        }
+        #endregion
     }
 }

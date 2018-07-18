@@ -21,7 +21,6 @@ namespace DiscordWPF.Net
 
         static Update()
         {
-            _client.DefaultRequestHeaders.Accept.Clear();
             _client.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json"));
             _client.BaseAddress = new Uri(UPDATE_BASE_URL);
@@ -29,7 +28,17 @@ namespace DiscordWPF.Net
 
         private static string UpdaterExecutable => Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "DiscordWPF.Updater.exe");
 
-        internal static bool CanDoUpdate() => File.Exists(UpdaterExecutable);
+        internal static async Task EnsureUpdaterExecutable()
+        {
+            if (File.Exists(UpdaterExecutable))
+                File.Delete(UpdaterExecutable);
+
+            using (var localStream = File.Create(UpdaterExecutable, 2048, FileOptions.Asynchronous))
+            using (var remoteStream = await _client.GetStreamAsync("updater/latest"))
+            {
+                await remoteStream.CopyToAsync(localStream);
+            }
+        }
 
         internal static async Task<bool> CheckForUpdates()
         {
@@ -54,6 +63,7 @@ namespace DiscordWPF.Net
 
         internal static async Task RunUpdateAsync()
         {
+            await EnsureUpdaterExecutable();
             Process.Start(UpdaterExecutable, $"--type=update --pid={Process.GetCurrentProcess().Id}");
             await Task.Delay(2000); // not important, just looks cleaner.
             Application.Current.Shutdown();
